@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import './Home.css';
 import logo from './assets/albertou.png';
 import heroPhoto from './assets/mainpic.png';
+import EventsNearYou from './EventsNearYou.jsx';
 
 function SiteHeader() {
   const headerRef = useRef(null);
@@ -149,19 +150,9 @@ function HowItWorks() {
           </article>
 
           {/* Location motif: dotted route from the match to a pin on the event */}
-          <svg className="route" viewBox="0 0 96 56" aria-hidden="true" focusable="false">
-            <path className="route__line" d="M6,0 C2,18 30,22 46,26 C64,31 84,34 88,48"></path>
-            <circle className="route__pin" cx="88" cy="50" r="5"></circle>
-          </svg>
-
-          <article className="snip snip--event" id="community" aria-labelledby="demo-event">
-            <div className="snip__head">
-              <p className="snip__kind">Local event</p>
-              <span className="snip__demo">Demo</span>
-            </div>
-            <h3 className="snip__title" id="demo-event">Saturday welcome walk &amp; coffee</h3>
-            <p className="snip__meta">Sat, 10&nbsp;AM &middot; Fern Street Caf&eacute;, 0.4&nbsp;mi away &middot; 18 neighbors going</p>
-          </article>
+          <div id="community">
+            <EventsNearYou />
+          </div>
         </div>
       </div>
     </section>
