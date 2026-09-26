@@ -11,9 +11,7 @@ function useIsMapRoute() {
 
   useEffect(() => {
     const onHashChange = () => setIsMap(window.location.hash === MAP_ROUTE);
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
-  }, []);
+   window.addEventListener('hashchange', onHashChange);  }, []);
 
   return isMap;
 }
