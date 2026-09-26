@@ -1,19 +1,38 @@
-import { APIProvider, Map } from '@vis.gl/react-google-maps';
+import { useEffect, useState } from 'react';
+import Home from './Home.jsx';
+import MapPage from './MapPage.jsx';
 
-const API_KEY = import.meta.env.VITE_MAPS_BROWSER_KEY;
-const MAP_ID = import.meta.env.VITE_MAP_ID;
+const MAP_ROUTE = '#/map';
+
+// Minimal hash routing: "#/map" shows the map; everything else is the homepage
+// (plain "#section" hashes still scroll within the homepage).
+function useIsMapRoute() {
+  const [isMap, setIsMap] = useState(() => window.location.hash === MAP_ROUTE);
+
+  useEffect(() => {
+    const onHashChange = () => setIsMap(window.location.hash === MAP_ROUTE);
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  return isMap;
+}
 
 export default function App() {
-  return (
-    <APIProvider apiKey={API_KEY}>
-      <div style={{ height: '100vh', width: '100%' }}>
-        <Map
-          mapId={MAP_ID}
-          defaultCenter={{ lat: 39.8283, lng: -98.5795 }}
-          defaultZoom={4}
-          gestureHandling="greedy"
-        />
-      </div>
-    </APIProvider>
-  );
+  const isMap = useIsMapRoute();
+
+  useEffect(() => {
+    if (isMap) window.scrollTo(0, 0);
+  }, [isMap]);
+
+  if (isMap) {
+    return (
+      <>
+        <a className="map-back" href="#top">&larr; Back to home</a>
+        <MapPage />
+      </>
+    );
+  }
+
+  return <Home />;
 }
