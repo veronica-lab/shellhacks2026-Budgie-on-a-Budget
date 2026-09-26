@@ -24,5 +24,8 @@ dist-ssr
 *.sw?
 .env
 scripts/schools.txt
+scripts/county-health.csv
+scripts/zcta_county.txt
+
 
 

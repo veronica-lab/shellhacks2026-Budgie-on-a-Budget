@@ -1,10 +1,11 @@
 export default function ZipInfoCard({ zip }) {
   const rows = [
+    ['County', zip.county ?? 'Unknown'],
     ['Distance', `${zip.miles.toFixed(1)} mi away`],
     ['Commute', zip.commute_mins != null ? `${zip.commute_mins} min` : 'Coming soon'],
     ['Avg rent', zip.median_rent != null ? `$${zip.median_rent.toLocaleString()}/mo` : 'Coming soon'],
-    ['Safety', zip.safety_score ?? 'Coming soon'],
-    ['Schools nearby', zip.schools_nearby ?? 'Coming soon'],
+    ['Safety', zip.safety_score != null ? `${zip.safety_score}/100` : 'Not enough data'],
+    ['Public schools', zip.schools_nearby ?? 0],
   ];
 
   return (
@@ -19,6 +20,11 @@ export default function ZipInfoCard({ zip }) {
           <span style={{ fontWeight: 600 }}>{value}</span>
         </div>
       ))}
+      {zip.safety_score != null && (
+        <div style={{ fontSize: 11, color: '#888', marginTop: 6 }}>
+          Safety = % of US counties with a higher homicide rate
+        </div>
+      )}
     </div>
   );
 }
