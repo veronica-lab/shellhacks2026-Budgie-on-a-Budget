@@ -1,11 +1,16 @@
-let cache = null;
+let zipCache = null;
+let schoolCache = null;
 
-async function loadZips() {
-  if (!cache) {
-    const res = await fetch('/zip-centroids.json');
-    cache = await res.json();
+async function loadData() {
+  if (!zipCache) {
+    const [zipsRes, schoolsRes] = await Promise.all([
+      fetch('/zip-centroids.json'),
+      fetch('/zip-schools.json'),
+    ]);
+    zipCache = await zipsRes.json();
+    schoolCache = await schoolsRes.json();
   }
-  return cache;
+  return { zips: zipCache, schools: schoolCache };
 }
 
 // Straight-line distance in miles between two points
@@ -20,9 +25,13 @@ function milesBetween(a, b) {
 }
 
 export async function findNearbyZips(destination, radiusMiles = 30) {
-  const zips = await loadZips();
+  const { zips, schools } = await loadData();
   return zips
-    .map(z => ({ ...z, miles: milesBetween(destination, z) }))
+    .map(z => ({
+      ...z,
+      miles: milesBetween(destination, z),
+      schools_nearby: schools[z.zip] ?? 0,
+    }))
     .filter(z => z.miles <= radiusMiles)
     .sort((a, b) => a.miles - b.miles);
 }
