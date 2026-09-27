@@ -179,7 +179,8 @@ export default function Home() {
       <main id="main">
         <Hero />
         <HowItWorks />
-      </main>
+        <EventsNearYou />
+</main>
       <SiteFooter />
     </>
   );

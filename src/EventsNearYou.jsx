@@ -1,7 +1,7 @@
 import { useState } from 'react';
+import './EventsNearYou.css';
 
 const TICKETMASTER_API_KEY = import.meta.env.VITE_TICKETMASTER_API_KEY;
-console.log('Ticketmaster key loaded:', !!TICKETMASTER_API_KEY);
 
 export default function EventsNearYou() {
   const [zipCode, setZipCode] = useState('');
@@ -10,155 +10,229 @@ export default function EventsNearYou() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
 
-   async function handleFindEvents() {
-  setError('');
-  setLocation(null);
-  setEvents([]);
+  async function handleFindEvents() {
+    setError('');
+    setLocation(null);
+    setEvents([]);
 
-  if (!/^\d{5}$/.test(zipCode)) {
-    setError('Please enter a valid 5-digit ZIP code.');
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    // Get ZIP code data
-    const response = await fetch('/zip-centroids.json');
-
-    if (!response.ok) {
-      throw new Error('Could not load ZIP code data.');
-    }
-
-    const zips = await response.json();
-
-    const match = zips.find((z) => z.zip === zipCode);
-
-    if (!match) {
-      setError('We could not find that ZIP code.');
+    if (!/^\d{5}$/.test(zipCode)) {
+      setError('Please enter a valid 5-digit ZIP code.');
       return;
     }
 
-    const selectedLocation = {
-      zip: match.zip,
-      lat: match.lat,
-      lng: match.lng,
-    };
+    try {
+      setLoading(true);
 
-    setLocation(selectedLocation);
+      // Find ZIP coordinates
+      const response = await fetch('/zip-centroids.json');
 
-    // Ticketmaster API request
-    const params = new URLSearchParams({
-    apikey: TICKETMASTER_API_KEY,
-    latlong: `${match.lat},${match.lng}`,
-    radius: '30',
-    unit: 'miles',
-    size: '20',
-    sort: 'distance,asc',
-    });
+      if (!response.ok) {
+        throw new Error('Could not load ZIP code data.');
+      }
 
-    const ticketmasterResponse = await fetch(
-      `https://app.ticketmaster.com/discovery/v2/events.json?${params}`
-    );
+      const zips = await response.json();
+      const match = zips.find((z) => z.zip === zipCode);
 
-    if (!ticketmasterResponse.ok) {
-  const errorText = await ticketmasterResponse.text();
+      if (!match) {
+        setError('We could not find that ZIP code.');
+        return;
+      }
 
-  console.error('Ticketmaster error:', {
-    status: ticketmasterResponse.status,
-    response: errorText,
-  });
+      const selectedLocation = {
+        zip: match.zip,
+        lat: match.lat,
+        lng: match.lng,
+      };
 
-  throw new Error(
-    `Ticketmaster request failed (${ticketmasterResponse.status}).`
-  );
-}
+      setLocation(selectedLocation);
 
-    const ticketmasterData = await ticketmasterResponse.json();
+      // Search Ticketmaster
+      const params = new URLSearchParams({
+        apikey: TICKETMASTER_API_KEY,
+        latlong: `${match.lat},${match.lng}`,
+        radius: '30',
+        unit: 'miles',
+        size: '20',
+        sort: 'distance,asc',
+      });
 
-    const foundEvents = ticketmasterData._embedded?.events || [];
+      const ticketmasterResponse = await fetch(
+        `https://app.ticketmaster.com/discovery/v2/events.json?${params}`
+      );
 
-    setEvents(foundEvents);
+      if (!ticketmasterResponse.ok) {
+        throw new Error(
+          `Ticketmaster request failed (${ticketmasterResponse.status}).`
+        );
+      }
 
-  } catch (err) {
-  console.error('Events error:', err);
-  setError(err.message || 'Something went wrong while finding events.');
-} finally {
-    setLoading(false);
+      const ticketmasterData = await ticketmasterResponse.json();
+
+      const foundEvents = ticketmasterData._embedded?.events || [];
+
+      setEvents(foundEvents);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Something went wrong while finding events.');
+    } finally {
+      setLoading(false);
+    }
   }
-}
 
   return (
-    <section>
-      <h2>Events near you</h2>
+    <section className="events-near-you">
 
-      <p>
-        Enter a ZIP code to discover what's happening nearby.
-      </p>
+      {/* Header */}
+      <div className="events-near-you__header">
+        <p className="events-near-you__eyebrow">
+          Explore your community
+        </p>
 
-      <input
-        type="text"
-        value={zipCode}
-        onChange={(e) => setZipCode(e.target.value)}
-        placeholder="Enter ZIP code"
-        maxLength={5}
-        inputMode="numeric"
-      />
+        <h2 className="events-near-you__title">
+          Events near you
+        </h2>
 
-      <button type="button" onClick={handleFindEvents}>
-        Find Events
-      </button>
+        <p className="events-near-you__description">
+          Discover concerts, sports, festivals, and other events happening
+          around your future neighborhood.
+        </p>
+      </div>
 
+      {/* ZIP search */}
+      <div className="events-near-you__search">
+        <input
+          className="events-near-you__input"
+          type="text"
+          value={zipCode}
+          onChange={(e) => setZipCode(e.target.value)}
+          placeholder="Enter your ZIP code"
+          maxLength={5}
+          inputMode="numeric"
+        />
+
+        <button
+          className="events-near-you__button"
+          type="button"
+          onClick={handleFindEvents}
+          disabled={loading}
+        >
+          {loading ? 'Finding...' : 'Find Events'}
+        </button>
+      </div>
+
+      {/* Error */}
       {error && (
-        <p role="alert">
+        <p className="events-near-you__error" role="alert">
           {error}
         </p>
       )}
 
+      {/* Location */}
       {location && (
-        <div>
-          <p>
-            Found ZIP code: <strong>{location.zip}</strong>
-          </p>
+        <p className="events-near-you__location">
+          Showing events near{' '}
+          <strong>{location.zip}</strong>
+        </p>
+      )}
 
+      {/* Loading */}
+      {loading && (
+        <p className="events-near-you__loading">
+          Finding events near you...
+        </p>
+      )}
+
+      {/* Results */}
+      {events.length > 0 && (
+        <div className="events-results">
+
+          <div className="events-results__heading">
+            <h3>Upcoming events</h3>
+
+            <span className="events-results__count">
+              {events.length} events found
+            </span>
+          </div>
+
+          <div className="events-grid">
+
+            {events.map((event) => {
+              const venue = event._embedded?.venues?.[0];
+
+              const image =
+                event.images?.find((img) => img.width >= 300)?.url ||
+                event.images?.[0]?.url;
+
+              const date = event.dates?.start?.localDate;
+              const time = event.dates?.start?.localTime;
+
+              return (
+                <article className="event-card" key={event.id}>
+
+                  {/* Image */}
+                  {image && (
+                    <div className="event-card__image-wrapper">
+                      <img
+                        className="event-card__image"
+                        src={image}
+                        alt=""
+                      />
+                    </div>
+                  )}
+
+                  {/* Information */}
+                  <div className="event-card__content">
+
+                    <h4 className="event-card__title">
+                      {event.name}
+                    </h4>
+
+                    <p className="event-card__date">
+                      📅 {date || 'Date coming soon'}
+                      {time && ` · ${time}`}
+                    </p>
+
+                    <p className="event-card__venue">
+                      📍 {venue?.name || 'Venue coming soon'}
+                    </p>
+
+                    {venue?.city?.name && (
+                      <p className="event-card__location">
+                        {venue.city.name}
+                        {venue.state?.stateCode &&
+                          `, ${venue.state.stateCode}`}
+                      </p>
+                    )}
+
+                    {event.url && (
+                      <a
+                        className="event-card__link"
+                        href={event.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View event →
+                      </a>
+                    )}
+
+                  </div>
+                </article>
+              );
+            })}
+
+          </div>
+        </div>
+      )}
+
+      {/* No results */}
+      {!loading && location && events.length === 0 && !error && (
+        <div className="events-empty">
           <p>
-            Coordinates: {location.lat}, {location.lng}
+            We couldn't find any upcoming events within 30 miles.
           </p>
         </div>
       )}
-      {loading && (
-  <p>Finding events near you...</p>
-)}
 
-{events.length > 0 && (
-  <div>
-    <h3>Upcoming events</h3>
-
-    {events.map((event) => (
-      <article key={event.id}>
-        <h4>{event.name}</h4>
-
-        <p>
-          {event.dates?.start?.localDate || 'Date coming soon'}
-        </p>
-
-        <p>
-          {event._embedded?.venues?.[0]?.name || 'Venue coming soon'}
-        </p>
-
-        {event.url && (
-          <a
-            href={event.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View Event
-          </a>
-        )}
-      </article>
-    ))}
-  </div>
-)}
     </section>
   );
 }
