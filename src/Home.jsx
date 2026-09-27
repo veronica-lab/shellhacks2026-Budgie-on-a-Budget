@@ -60,6 +60,7 @@ function SiteHeader() {
         <div className={`nav__menu${menuOpen ? ' is-open' : ''}`} id="nav-menu" onClick={closeOnLink}>
           <ul className="nav__links">
             <li><a href="#community">Events near you</a></li>
+            <li><a href="#/budget">Budget advisor</a></li>
             <li><a href="#advertise">Advertise with us</a></li>
             <li><a href="#/map">Explore map</a></li>
           </ul>
@@ -99,7 +100,7 @@ function Hero() {
           <div className="hero__actions">
             <a className="btn btn--secondary" href="#community">Find local events</a>
             <a className="btn btn--secondary" href="#explore-neighborhoods">Explore neighborhoods</a>
-            <a className="btn btn--primary" href="#how-it-works">Take the quiz!</a>
+            <a className="btn btn--primary" href="#/quiz">Take the quiz!</a>
           </div>
         </div>
       </div>
