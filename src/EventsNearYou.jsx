@@ -98,7 +98,6 @@ export default function EventsNearYou() {
         </p>
       </div>
 
-      {/* ZIP search */}
       <div className="events-near-you__search">
         <input
           className="events-near-you__input"
@@ -120,14 +119,14 @@ export default function EventsNearYou() {
         </button>
       </div>
 
-      {/* Error */}
+      
       {error && (
         <p className="events-near-you__error" role="alert">
           {error}
         </p>
       )}
 
-      {/* Location */}
+      
       {location && (
         <p className="events-near-you__location">
           Showing events near{' '}
@@ -135,14 +134,14 @@ export default function EventsNearYou() {
         </p>
       )}
 
-      {/* Loading */}
+      
       {loading && (
         <p className="events-near-you__loading">
           Finding events near you...
         </p>
       )}
 
-      {/* Results */}
+      
       {events.length > 0 && (
         <div className="events-results">
 
@@ -169,7 +168,7 @@ export default function EventsNearYou() {
               return (
                 <article className="event-card" key={event.id}>
 
-                  {/* Image */}
+                  
                   {image && (
                     <div className="event-card__image-wrapper">
                       <img
@@ -180,7 +179,7 @@ export default function EventsNearYou() {
                     </div>
                   )}
 
-                  {/* Information */}
+                  
                   <div className="event-card__content">
 
                     <h4 className="event-card__title">
@@ -224,7 +223,7 @@ export default function EventsNearYou() {
         </div>
       )}
 
-      {/* No results */}
+     
       {!loading && location && events.length === 0 && !error && (
         <div className="events-empty">
           <p>

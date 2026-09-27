@@ -1,14 +1,14 @@
-/* We Movers — homepage styles (imported by Home.jsx) */
+
 
 :root {
-  /* Figma palette */
+  
   --tan: #dcc4a6;
   --chip: #d9d9d9;
   --olive: #657f31;
   --forest: #1e3a0e;
   --white: #ffffff;
 
-  /* Lower section */
+  
   --cream: #f6efe2;
   --cream-card: #fffaf2;
   --ink: #1b2415;
@@ -26,7 +26,7 @@
   box-sizing: border-box;
 }
 
-/* --header-h is measured in Home.jsx; --nav-h is the fallback before it runs. */
+
 html {
   scroll-padding-top: calc(var(--header-h, var(--nav-h)) + 16px);
 }
@@ -82,7 +82,6 @@ a {
   top: 12px;
 }
 
-/* ---------- Navigation ---------- */
 
 .site-header {
   position: sticky;
@@ -197,7 +196,7 @@ a {
   cursor: pointer;
 }
 
-/* Three-bar icon; turns into an X when open */
+
 .nav__toggle-bars,
 .nav__toggle-bars::before,
 .nav__toggle-bars::after {
@@ -240,8 +239,6 @@ a {
   transform: translateY(-6px) rotate(-45deg);
 }
 
-/* ---------- Hero ---------- */
-
 .hero {
   display: grid;
   grid-template-columns: 45fr 55fr;
@@ -254,7 +251,6 @@ a {
   overflow: hidden;
 }
 
-/* object-fit keeps the photo's aspect ratio; it crops the edges rather than stretching */
 .hero__media img {
   position: absolute;
   inset: 0;
@@ -361,13 +357,11 @@ a {
   text-underline-offset: 4px;
 }
 
-/* ---------- Intro (cream section) ---------- */
 
 .intro {
   padding: clamp(36px, 5vw, 64px) var(--gutter) clamp(56px, 7vw, 96px);
 }
 
-/* Asymmetrical: editorial copy on the left, a small demo preview on the right */
 .intro__inner {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
@@ -549,7 +543,6 @@ a {
   color: var(--ink-muted);
 }
 
-/* Route motif: lands on the event card 36px in from its left edge */
 .route {
   display: block;
   width: 96px;
@@ -572,7 +565,6 @@ a {
   stroke-width: 2.5;
 }
 
-/* ---------- Map view back link (App.jsx) ---------- */
 
 .map-back {
   position: fixed;
@@ -589,7 +581,6 @@ a {
   text-decoration: none;
 }
 
-/* ---------- Footer ---------- */
 
 .site-footer {
   padding: 28px var(--gutter);
@@ -615,9 +606,7 @@ a {
   color: var(--ink);
 }
 
-/* ---------- Responsive ---------- */
 
-/* Tablet and below: nav collapses behind the menu button */
 @media (max-width: 960px) {
   .nav__toggle {
     display: inline-flex;
@@ -636,7 +625,7 @@ a {
     border-top: 1.5px solid var(--forest);
   }
 
-  /* Hidden until the menu button opens it */
+  
   .nav__menu:not(.is-open) {
     display: none;
   }
@@ -672,7 +661,7 @@ a {
     height: auto;
   }
 
-  /* Full photo at its natural 2048×1155 ratio, no cropping */
+  
   .hero__media {
     aspect-ratio: 2048 / 1155;
   }
@@ -704,7 +693,7 @@ a {
     margin-left: 40px;
   }
 
-  /* Scaled route still lands on the event card */
+
   .route {
     width: 72px;
     height: 42px;

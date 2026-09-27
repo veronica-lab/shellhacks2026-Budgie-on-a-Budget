@@ -4,8 +4,6 @@ import MapPage from './MapPage.jsx';
 
 const MAP_ROUTE = '#/map';
 
-// Minimal hash routing: "#/map" shows the map; everything else is the homepage
-// (plain "#section" hashes still scroll within the homepage).
 function useIsMapRoute() {
   const [isMap, setIsMap] = useState(() => window.location.hash === MAP_ROUTE);
 
