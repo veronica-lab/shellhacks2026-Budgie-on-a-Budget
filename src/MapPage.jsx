@@ -47,8 +47,10 @@ const iconButtonStyle = {
   fontSize: 16, color: '#555', padding: '0 4px', lineHeight: 1,
 };
 
-export default function MapPage() {
+export default function MapPage({ initialZip = null }) {
   const [destination, setDestination] = useState(null);
+  // ZIP handed over from the quiz; selected once the nearby ZIPs load
+  const [pendingZip, setPendingZip] = useState(initialZip?.zip ?? null);
   const [focus, setFocus] = useState(null);
   const [nearbyZips, setNearbyZips] = useState([]);
   const [commuteLoaded, setCommuteLoaded] = useState(false);
@@ -57,10 +59,42 @@ export default function MapPage() {
   const [selectedZip, setSelectedZip] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [panelOpen, setPanelOpen] = useState(true);
+  const [searchMode, setSearchMode] = useState('job'); // 'job' = commute matters, 'area' = just exploring
 
   // Homes view: { zip, type: 'rent' | 'sale', listings, loading, error } or null
   const [homes, setHomes] = useState(null);
   const [selectedHome, setSelectedHome] = useState(null);
+
+  // Coming from the quiz: center the search on that ZIP
+  const { zip: startZip, lat: startLat, lng: startLng } = initialZip ?? {};
+  useEffect(() => {
+    if (!startZip) return;
+    let cancelled = false;
+    const label = `ZIP ${startZip}`;
+    if (startLat != null && startLng != null) {
+      setDestination({ label, lat: startLat, lng: startLng });
+      return;
+    }
+    fetch('/zip-centroids.json')
+      .then(r => r.json())
+      .then(zips => {
+        const match = zips.find(z => z.zip === startZip);
+        if (!cancelled && match) setDestination({ label, lat: match.lat, lng: match.lng });
+      })
+      .catch(err => console.error('ZIP lookup error:', err));
+    return () => { cancelled = true; };
+  }, [startZip, startLat, startLng]);
+
+  // Once nearby ZIPs are in, open the card for the ZIP picked in the quiz
+  useEffect(() => {
+    if (!pendingZip || nearbyZips.length === 0) return;
+    const match = nearbyZips.find(z => z.zip === pendingZip);
+    if (match) {
+      setSelectedZip(match);
+      setFocus({ lat: match.lat, lng: match.lng, zoom: 12 });
+    }
+    setPendingZip(null);
+  }, [pendingZip, nearbyZips]);
 
   // When a destination is picked: find nearby ZIPs, commute times, and real events
   useEffect(() => {
@@ -75,18 +109,19 @@ export default function MapPage() {
     setFocus({ lat: destination.lat, lng: destination.lng, zoom: 10 });
 
     findNearbyZips(destination, 30).then(async zips => {
-      if (cancelled) return;
-      setNearbyZips(zips);
-      try {
-        const times = await fetchCommuteTimes(destination, zips.slice(0, 150));
-        if (!cancelled) {
-          setNearbyZips(zips.map(z => ({ ...z, commute_mins: times[z.zip] ?? null })));
-          setCommuteLoaded(true);
-        }
-      } catch (err) {
-        console.error('Commute error:', err);
-      }
-    });
+  if (cancelled) return;
+  setNearbyZips(zips);
+  if (searchMode !== 'job') { setCommuteLoaded(true); return; } // no commute needed
+  try {
+    const times = await fetchCommuteTimes(destination, zips.slice(0, 150));
+    if (!cancelled) {
+      setNearbyZips(zips.map(z => ({ ...z, commute_mins: times[z.zip] ?? null })));
+      setCommuteLoaded(true);
+    }
+  } catch (err) {
+    console.error('Commute error:', err);
+  }
+});
 
     fetchTicketmasterEvents(destination.lat, destination.lng, 30)
       .then(evts => { if (!cancelled) setTmEvents(evts); })
@@ -123,9 +158,9 @@ export default function MapPage() {
 
   const inHomesView = homes != null;
 
-  const visibleZips = inHomesView ? [] : commuteLoaded
-    ? nearbyZips.filter(z => z.commute_mins != null && z.commute_mins <= maxCommute)
-    : nearbyZips;
+  const visibleZips = inHomesView ? [] : (searchMode === 'job' && commuteLoaded)
+  ? nearbyZips.filter(z => z.commute_mins != null && z.commute_mins <= maxCommute)
+  : nearbyZips;
 
   const events = destination && !inHomesView
     ? [...tmEvents, ...MOCK_EVENTS.filter(e => e.is_promoted)]
@@ -174,16 +209,32 @@ export default function MapPage() {
         }}>
           {/* Normal view: search + commute slider */}
           <div style={{ display: inHomesView ? 'none' : 'block' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>Where do you work or study?</span>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+  <button
+    onClick={() => setSearchMode('job')}
+    style={toggleStyle(searchMode === 'job')}
+  >
+    Near my job
+  </button>
+  <button
+    onClick={() => setSearchMode('area')}
+    style={toggleStyle(searchMode === 'area')}
+  >
+    Explore an area
+  </button>
+</div>
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+  <span style={{ fontSize: 14, fontWeight: 600 }}>
+    {searchMode === 'job' ? 'Where do you work or study?' : 'What city or area are you considering?'}
+  </span>
               {destination && (
                 <button style={iconButtonStyle} onClick={() => setPanelOpen(false)} title="Minimize">◂</button>
               )}
             </div>
             <DestinationSearch onSelect={setDestination} />
 
-            {nearbyZips.length > 0 && (
-              <div style={{ marginTop: 8, fontSize: 14 }}>
+            {nearbyZips.length > 0 && searchMode === 'job' && (
+  <div style={{ marginTop: 8, fontSize: 14 }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   Max commute: <strong>{maxCommute} min</strong>
                   <input
@@ -258,7 +309,7 @@ export default function MapPage() {
             >
               <div style={{
                 width: 14, height: 14, borderRadius: '50%', cursor: 'pointer',
-                background: selectedZip?.zip === z.zip ? '#f97316' : dotColor(z, maxCommute),
+                background: selectedZip?.zip === z.zip ? '#f97316' : (searchMode === 'job' ? dotColor(z, maxCommute) : '#2563eb'),
                 border: '2px solid white', boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
               }} />
             </AdvancedMarker>

@@ -591,7 +591,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
 
                 <button
                   onClick={() =>
-                    onOpenMap ? onOpenMap() : setResultView("map")
+                    onOpenMap ? onOpenMap(z) : setResultView("map")
                   }
                   className="w-full py-3 px-4 rounded-lg bg-[#19350C] hover:bg-[#264d14] text-white text-xs font-bold uppercase tracking-wider transition"
                 >
@@ -618,7 +618,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
               </div>
               {onOpenMap && (
                 <button
-                  onClick={onOpenMap}
+                  onClick={() => onOpenMap()}
                   className="px-4 py-2 rounded-lg bg-[#19350C] text-white text-xs font-bold"
                 >
                   Open Fullscreen Google Map

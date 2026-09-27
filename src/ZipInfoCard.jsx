@@ -15,7 +15,7 @@ export default function ZipInfoCard({ zip, onShowHomes }) {
   const rows = [
     ['County', zip.county ?? 'Unknown'],
     ['Distance', `${zip.miles.toFixed(1)} mi away`],
-    ['Commute', zip.commute_mins != null ? `${zip.commute_mins} min` : 'Calculating…'],
+    ...(zip.commute_mins != null ? [['Commute', `${zip.commute_mins} min`]] : []),
     ['Home value', formatValue(zip)],
     ['Safety', zip.safety_score != null ? `${zip.safety_score}/100` : 'Not enough data'],
     ['Public schools', zip.schools_nearby ?? 0],

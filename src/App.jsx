@@ -21,23 +21,47 @@ function useCurrentRoute() {
   return route;
 }
 
+function parseZipQuery(query) {
+  const params = new URLSearchParams(query);
+  const zip = params.get('zip');
+  if (!zip) return null;
+  const lat = Number(params.get('lat'));
+  const lng = Number(params.get('lng'));
+  return { zip, lat: Number.isFinite(lat) ? lat : null, lng: Number.isFinite(lng) ? lng : null };
+}
+
+function openMapAtZip(zip) {
+  if (!zip?.zip) {
+    window.location.hash = MAP_ROUTE;
+    return;
+  }
+  const params = new URLSearchParams({ zip: zip.zip });
+  if (zip.lat != null && zip.lng != null) {
+    params.set('lat', zip.lat);
+    params.set('lng', zip.lng);
+  }
+  window.location.hash = `${MAP_ROUTE}?${params}`;
+}
+
 export default function App() {
   const route = useCurrentRoute();
-  const isMap = route === MAP_ROUTE;
+  // Map route may carry a ZIP to preselect, e.g. "#/map?zip=33139&lat=..&lng=.."
+  const [routePath, routeQuery = ''] = route.split('?');
+  const isMap = routePath === MAP_ROUTE;
   const isQuiz = route === QUIZ_ROUTE;
   const isBudget = route === BUDGET_ROUTE;
 
   useEffect(() => {
-    if ([MAP_ROUTE, QUIZ_ROUTE, BUDGET_ROUTE].includes(route)) {
+    if ([MAP_ROUTE, QUIZ_ROUTE, BUDGET_ROUTE].includes(routePath)) {
       window.scrollTo(0, 0);
     }
-  }, [route]);
+  }, [routePath]);
 
   if (isMap) {
     return (
       <>
         <a className="map-back" href="#top">&larr; Back to home</a>
-        <MapPage />
+        <MapPage key={routeQuery} initialZip={parseZipQuery(routeQuery)} />
       </>
     );
   }
@@ -46,7 +70,7 @@ export default function App() {
     return (
       <>
         <a className="map-back" href="#top">&larr; Back to home</a>
-        <PreferenceQuestionnaire onOpenMap={() => { window.location.hash = MAP_ROUTE; }} />
+        <PreferenceQuestionnaire onOpenMap={openMapAtZip} />
       </>
     );
   }
