@@ -4,10 +4,14 @@ import BusinessPage from './BusinessPage.jsx';
 import CommunityPage from './CommunityPage.jsx';
 import Home from './Home.jsx';
 import MapPage from './MapPage.jsx';
+import PreferenceQuestionnaire from './PreferenceQuestionnaire.jsx';
+import BudgetAdvisorChat from './BudgetAdvisorChat.jsx';
 import { useAuth } from './useAuth.js';
 
 const ROUTES = {
   '#/map': 'map',
+  '#/quiz': 'quiz',
+  '#/budget': 'budget',
   '#/login': 'login',
   '#/signup': 'signup',
   '#/business': 'business',
@@ -19,7 +23,7 @@ const ROUTES = {
 // the hash (e.g. "#error=access_denied&error_description=..."). Read it once.
 const linkError = new URLSearchParams(window.location.hash.slice(1)).get('error_description') || '';
 
-// Minimal hash routing: "#/map", "#/login", "#/signup" are pages; everything
+// Minimal hash routing: "#/map", "#/quiz", "#/login", etc. are pages; everything
 // else is the homepage (plain "#section" hashes still scroll within it).
 // A page can take a query after "?", e.g. "#/community?zip=33174".
 function useRoute() {
@@ -70,6 +74,24 @@ export default function App() {
       <>
         <a className="map-back" href="#top">&larr; Back to home</a>
         <MapPage />
+      </>
+    );
+  }
+
+  if (route === 'quiz') {
+    return (
+      <>
+        <a className="map-back" href="#top">&larr; Back to home</a>
+        <PreferenceQuestionnaire onOpenMap={() => { window.location.hash = '#/map'; }} />
+      </>
+    );
+  }
+
+  if (route === 'budget') {
+    return (
+      <>
+        <a className="map-back" href="#top">&larr; Back to home</a>
+        <BudgetAdvisorChat />
       </>
     );
   }

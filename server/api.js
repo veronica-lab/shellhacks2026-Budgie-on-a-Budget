@@ -278,7 +278,8 @@ async function handle(req, res, next) {
   if (!path.startsWith('/api/')) return next();
 
   const route = ROUTES[`${req.method} ${path}`];
-  if (!route) return send(res, 404, { error: { code: 'not_found', message: 'Not found.' } });
+  // Not ours (e.g. /api/commute, /api/listings): let Vite proxy it to the Express server.
+  if (!route) return next();
 
   try {
     send(res, 200, await route(req));

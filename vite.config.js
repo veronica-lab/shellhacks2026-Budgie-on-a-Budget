@@ -1,9 +1,15 @@
-import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import { budgieApi } from './server/api.js'
 
-// https://vite.dev/config/
 export default defineConfig({
-  // budgieApi serves /api/* (Snowflake) from the dev and preview servers.
-  plugins: [react(), budgieApi()],
+  // budgieApi serves its own /api/* routes (Snowflake) from the dev and preview
+  // servers; any other /api/* request falls through to the Express server.
+  plugins: [react(), tailwindcss(), budgieApi()],
+  server: {
+    proxy: {
+      '/api': 'http://localhost:3001',
+    },
+  },
 })

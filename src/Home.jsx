@@ -6,6 +6,7 @@ import streetFairPhoto from '../mainpics/Community Gathering.jpg';
 import rooftopPhoto from '../mainpics/0712vo3.jpg';
 import conferencePhoto from '../mainpics/Event_Technology_Trends-Cvent_CONNECT_2023.jpg';
 import { supabase } from './supabaseClient.js';
+import EventsNearYou from './EventsNearYou.jsx';
 
 const HERO_SLIDES = [
   {
@@ -260,6 +261,7 @@ export function SiteHeader({ session = null, authLoading = false, current }) {
         <div className={`nav__menu${menuOpen ? ' is-open' : ''}`} id="nav-menu" onClick={closeOnLink}>
           <ul className="nav__links">
             <li><a href="#/community" aria-current={current === 'community' ? 'page' : undefined}>Community</a></li>
+            <li><a href="#/budget">Budget advisor</a></li>
             <li><a href="#/business" aria-current={current === 'business' ? 'page' : undefined}>Advertise with us</a></li>
             <li><a href="#/map">Explore map</a></li>
           </ul>
@@ -298,7 +300,7 @@ function Hero() {
           <div className="hero__actions">
             <a className="btn btn--secondary" href="#/community">Find local events</a>
             <a className="btn btn--secondary" href="#/map">Explore neighborhoods</a>
-            <a className="btn btn--primary" href="#how-it-works">Take the quiz!</a>
+            <a className="btn btn--primary" href="#/quiz">Take the quiz!</a>
           </div>
         </div>
       </div>
@@ -363,14 +365,10 @@ function HowItWorks() {
             <circle className="route__pin" cx="88" cy="50" r="5"></circle>
           </svg>
 
-          <article className="snip snip--event" aria-labelledby="demo-event">
-            <div className="snip__head">
-              <p className="snip__kind">Local event</p>
-              <span className="snip__demo">Demo</span>
-            </div>
-            <h3 className="snip__title" id="demo-event">Saturday welcome walk &amp; coffee</h3>
-            <p className="snip__meta">Sat, 10&nbsp;AM &middot; Fern Street Caf&eacute;, 0.4&nbsp;mi away &middot; 18 neighbors going</p>
-          </article>
+          {/* Not id="community": "#community" routes to the Community page */}
+          <div id="events-near-you">
+            <EventsNearYou />
+          </div>
         </div>
       </div>
     </section>
