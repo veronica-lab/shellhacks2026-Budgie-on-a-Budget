@@ -150,9 +150,6 @@ function HowItWorks() {
           </article>
 
           {/* Location motif: dotted route from the match to a pin on the event */}
-          <div id="community">
-            <EventsNearYou />
-          </div>
         </div>
       </div>
     </section>
@@ -180,7 +177,7 @@ export default function Home() {
         <Hero />
         <HowItWorks />
         <EventsNearYou />
-</main>
+      </main>
       <SiteFooter />
     </>
   );

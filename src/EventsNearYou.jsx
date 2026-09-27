@@ -80,7 +80,7 @@ export default function EventsNearYou() {
   }
 
   return (
-    <section className="events-near-you">
+    <section className="events-near-you" id="community">
 
       {/* Header */}
       <div className="events-near-you__header">
