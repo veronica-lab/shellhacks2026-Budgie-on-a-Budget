@@ -4,12 +4,16 @@ import DestinationSearch from './DestinationSearch';
 import ZipInfoCard from './ZipInfoCard';
 import EventCard from './EventCard';
 import { findNearbyZips } from './nearbyZips';
+import { fetchTicketmasterEvents } from './ticketmaster';
 import { MOCK_EVENTS } from './mockEvents';
 
 const API_KEY = import.meta.env.VITE_MAPS_BROWSER_KEY;
 const MAP_ID = import.meta.env.VITE_MAP_ID;
 
-const CATEGORY_ICONS = { cafe: '☕', fitness: '🏃', music: '🎵', market: '🛍️' };
+const CATEGORY_ICONS = {
+  cafe: '☕', fitness: '🏃', music: '🎵', market: '🛍️',
+  sports: '🏟️', arts: '🎭', family: '🎈', other: '🎟️',
+};
 
 function PanToDestination({ destination }) {
   const map = useMap();
@@ -24,17 +28,26 @@ function PanToDestination({ destination }) {
 export default function MapPage() {
   const [destination, setDestination] = useState(null);
   const [nearbyZips, setNearbyZips] = useState([]);
+  const [tmEvents, setTmEvents] = useState([]);
   const [selectedZip, setSelectedZip] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  // Swap MOCK_EVENTS for the teammate's real events later
-  const events = destination ? MOCK_EVENTS : [];
-
+  // When a destination is picked: find nearby ZIPs and real events
   useEffect(() => {
     if (!destination) return;
     setSelectedZip(null);
+    setSelectedEvent(null);
+    setTmEvents([]);
     findNearbyZips(destination, 30).then(setNearbyZips);
+    fetchTicketmasterEvents(destination.lat, destination.lng, 30)
+      .then(setTmEvents)
+      .catch(err => console.error('Ticketmaster error:', err));
   }, [destination]);
+
+  // Real Ticketmaster events + demo business promos (until the Business view saves real ones)
+  const events = destination
+    ? [...tmEvents, ...MOCK_EVENTS.filter(e => e.is_promoted)]
+    : [];
 
   const closeCards = () => { setSelectedZip(null); setSelectedEvent(null); };
 
@@ -42,7 +55,7 @@ export default function MapPage() {
     <APIProvider apiKey={API_KEY}>
       <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
         <div style={{
-          position: 'absolute', top: 50, left: '50%', transform: 'translateX(-50%)',
+          position: 'absolute', top: 90, left: '50%', transform: 'translateX(-50%)',
           zIndex: 1, width: 360, maxWidth: '90%',
           background: 'white', borderRadius: 8, padding: 8,
           boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
@@ -53,7 +66,7 @@ export default function MapPage() {
           <DestinationSearch onSelect={setDestination} />
           {nearbyZips.length > 0 && (
             <div style={{ marginTop: 6, fontSize: 14, color: '#333' }}>
-              {nearbyZips.length} areas within 30 miles. Click one for details.
+              {nearbyZips.length} areas within 30 miles · {tmEvents.length} events nearby
             </div>
           )}
         </div>
