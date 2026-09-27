@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import AuthPage from './AuthPage.jsx';
 import BusinessPage from './BusinessPage.jsx';
 import CommunityPage from './CommunityPage.jsx';
-import Home from './Home.jsx';
+import Home, { SiteHeader } from './Home.jsx';
 import MapPage from './MapPage.jsx';
 import PreferenceQuestionnaire from './PreferenceQuestionnaire.jsx';
-import BudgetAdvisorChat from './BudgetAdvisorChat.jsx';
+import BudgetPage from './BudgetPage.jsx';
 import { useAuth } from './useAuth.js';
 
 const ROUTES = {
@@ -49,8 +49,9 @@ function useRoute() {
 function parseZipQuery(params) {
   const zip = params.get('zip');
   if (!zip) return null;
-  const lat = Number(params.get('lat'));
-  const lng = Number(params.get('lng'));
+  // A missing lat/lng must stay missing (Number(null) would be 0, the middle of the ocean)
+  const lat = params.has('lat') ? Number(params.get('lat')) : NaN;
+  const lng = params.has('lng') ? Number(params.get('lng')) : NaN;
   return { zip, lat: Number.isFinite(lat) ? lat : null, lng: Number.isFinite(lng) ? lng : null };
 }
 
@@ -103,20 +104,16 @@ export default function App() {
   if (route === 'quiz') {
     return (
       <>
-        <a className="map-back" href="#top">&larr; Back to home</a>
+        <SiteHeader session={session} authLoading={loading} current="quiz" />
+        {/* Decorative ASCII house (art by jgs) behind the quiz, lower-left */}
+        <img className="quiz-deco" src="/house-ascii.png" alt="" width="797" height="332" />
         <PreferenceQuestionnaire onOpenMap={openMapAtZip} />
-
       </>
     );
   }
 
   if (route === 'budget') {
-    return (
-      <>
-        <a className="map-back" href="#top">&larr; Back to home</a>
-        <BudgetAdvisorChat />
-      </>
-    );
+    return <BudgetPage session={session} authLoading={loading} />;
   }
 
   if (route === 'community') {

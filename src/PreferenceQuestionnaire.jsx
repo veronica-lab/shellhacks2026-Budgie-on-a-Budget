@@ -59,6 +59,15 @@ const US_STATES = [
   { code: "WY", name: "Wyoming", city: "Cheyenne", baseRent: 1360 },
 ];
 
+// The quiz steps, in order: `label` for the progress bar, `title` for the
+// "Step N of 4" line above it.
+const STEPS = [
+  { label: "Destination & Commute", title: "Destination & Commute Profile" },
+  { label: "Budget & Household", title: "Monthly Housing Budget & Household" },
+  { label: "Top Priority", title: "Primary Relocation Priority" },
+  { label: "Live Events", title: "Live Events & Entertainment (Ticketmaster)" },
+];
+
 const DEFAULT_ANSWERS = {
   stateCode: "FL",
   targetCity: "Miami",
@@ -350,7 +359,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
 
   const [step, setStep] = useState(() => {
     const savedStep = Number(localStorage.getItem("weRemovers_quizStep"));
-    return savedStep >= 1 && savedStep <= 5 ? savedStep : 1;
+    return savedStep >= 1 && savedStep <= STEPS.length ? savedStep : 1;
   });
 
   const [showResults, setShowResults] = useState(() => {
@@ -454,21 +463,13 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
     return () => window.clearTimeout(timerId);
   }, [calculateMatches, rankedZips.length, showResults]);
 
-  const stepTitles = {
-    1: "Step 1 of 5  |  Destination & Commute Profile",
-    2: "Step 2 of 5  |  Monthly Housing Budget & Household",
-    3: "Step 3 of 5  |  Primary Relocation Priority",
-    4: "Step 4 of 5  |  Safety & Environmental Standards",
-    5: "Step 5 of 5  |  Live Events & Entertainment (Ticketmaster)",
-  };
-
   const selectedStateObj =
     US_STATES.find((s) => s.code === answers.stateCode) || US_STATES[8];
 
   if (showResults && rankedZips.length > 0) {
     const top3 = rankedZips.slice(0, 3);
     return (
-      <div className="py-10 px-6 max-w-6xl mx-auto">
+      <div className="relative z-[1] py-10 px-6 max-w-6xl mx-auto">
         <div className="bg-[#F4F3EE] border border-[#19350C]/20 rounded-xl p-6 mb-8 flex flex-wrap items-center justify-between gap-4 shadow-sm">
           <div>
             <span className="text-xs font-bold uppercase tracking-widest text-[#687D31]">
@@ -486,7 +487,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
               onClick={() => setResultView("top3")}
               className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
                 resultView === "top3"
-                  ? "bg-[#19350C] text-white"
+                  ? "bg-[#657f31] text-white"
                   : "bg-[#D5D3CC] text-[#19350C] hover:bg-[#c5c2b8]"
               }`}
             >
@@ -496,7 +497,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
               onClick={() => setResultView("map")}
               className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
                 resultView === "map"
-                  ? "bg-[#406768] text-white"
+                  ? "bg-[#657f31] text-white"
                   : "bg-[#D5D3CC] text-[#19350C] hover:bg-[#c5c2b8]"
               }`}
             >
@@ -524,13 +525,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <span
-                      className={`text-xs font-bold uppercase px-3 py-1 rounded-md ${
-                        i === 0
-                          ? "bg-[#19350C] text-white"
-                          : "bg-[#406768] text-white"
-                      }`}
-                    >
+                    <span className="text-xs font-bold uppercase px-3 py-1 rounded-md bg-[#657f31] text-white">
                       Rank #{i + 1}  |  {z.finalScore}% Match
                     </span>
                     <span className="text-xs font-bold text-[#406768]">
@@ -580,8 +575,8 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
                     </div>
                   </div>
 
-                  <div className="p-3.5 rounded-lg bg-[#6FA9BB]/20 border border-[#406768]/30 text-xs text-[#19350C] mb-5">
-                    <div className="font-bold uppercase tracking-wider text-[#406768] mb-1">
+                  <div className="p-3.5 rounded-lg bg-[#eef3e3] border border-[#657f31]/40 text-xs text-[#19350C] mb-5">
+                    <div className="font-bold uppercase tracking-wider text-[#4f6627] mb-1">
                       Ticketmaster Categories:{" "}
                       {Array.isArray(z.tags) ? z.tags.join(" • ") : "Live Events"}
                     </div>
@@ -593,7 +588,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
                   onClick={() =>
                     onOpenMap ? onOpenMap(z) : setResultView("map")
                   }
-                  className="w-full py-3 px-4 rounded-lg bg-[#19350C] hover:bg-[#264d14] text-white text-xs font-bold uppercase tracking-wider transition"
+                  className="w-full py-3 px-4 rounded-lg bg-[#657f31] hover:bg-[#4f6627] text-white text-xs font-bold uppercase tracking-wider transition"
                 >
                   View ZIP {z.zip} & Live Events on Map
                 </button>
@@ -619,7 +614,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
               {onOpenMap && (
                 <button
                   onClick={() => onOpenMap()}
-                  className="px-4 py-2 rounded-lg bg-[#19350C] text-white text-xs font-bold"
+                  className="px-4 py-2 rounded-lg bg-[#657f31] hover:bg-[#4f6627] text-white text-xs font-bold"
                 >
                   Open Fullscreen Google Map
                 </button>
@@ -641,7 +636,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
                       Safety: {z.crimeGrade}
                     </div>
                   </div>
-                  <span className="px-2.5 py-1 rounded text-xs font-bold bg-[#687D31] text-white">
+                  <span className="px-2.5 py-1 rounded text-xs font-bold bg-[#657f31] text-white">
                     {z.finalScore}%
                   </span>
                 </div>
@@ -654,34 +649,72 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
   }
 
   return (
-    <div className="py-12 px-6 flex items-center justify-center">
-      <div className="w-full max-w-2xl bg-[#F4F3EE] border border-[#19350C]/20 rounded-xl shadow-md overflow-hidden">
-        <div className="p-6 pb-5 bg-[#19350C] text-[#D5D3CC]">
-          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-widest mb-3">
-            <span>{stepTitles[step]}</span>
-          </div>
+    <main className="relative z-[1] min-h-screen px-4 py-8 sm:px-8 sm:py-12">
+      <section
+        aria-label="Relocation questionnaire"
+        className="mx-auto w-full max-w-5xl rounded-2xl bg-[#657f31] p-4 shadow-md sm:p-8"
+      >
+        <p className="text-xs font-semibold uppercase tracking-widest text-white sm:text-sm">
+          Step {step} of {STEPS.length} <span aria-hidden="true">·</span> {STEPS[step - 1].title}
+        </p>
 
-          <div className="grid grid-cols-5 gap-2">
-            {[1, 2, 3, 4, 5].map((num) => (
-              <button
-                key={num}
-                type="button"
-                onClick={() => setStep(num)}
-                className={`py-1.5 rounded text-xs font-bold uppercase tracking-wider transition ${
-                  step === num
-                    ? "bg-[#687D31] text-white"
-                    : num < step
-                    ? "bg-[#406768] text-white hover:bg-[#687D31]/80"
-                    : "bg-[#D5D3CC]/15 text-[#D5D3CC]/70 hover:bg-[#D5D3CC]/25"
-                }`}
-              >
-                Step {num}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Progress bar: completed steps in light green, the current one in tan, the rest outlined */}
+        <ol className="mt-4 grid grid-cols-4 gap-2 sm:gap-4">
+          {STEPS.map((s, i) => {
+            const num = i + 1;
+            const status = num === step ? "current" : num < step ? "done" : "upcoming";
+            return (
+              <li key={s.label}>
+                <button
+                  type="button"
+                  onClick={() => setStep(num)}
+                  aria-current={status === "current" ? "step" : undefined}
+                  aria-label={`Step ${num}: ${s.label}${status === "done" ? " (completed)" : ""}`}
+                  className="group flex w-full flex-col gap-2 rounded-lg p-1 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <span
+                    className={`h-2 w-full rounded-full transition-colors ${
+                      status === "current"
+                        ? "bg-[#dcc4a6]"
+                        : status === "done"
+                        ? "bg-[#eef3e3]"
+                        : "bg-white/25 group-hover:bg-white/40"
+                    }`}
+                  />
+                  <span className="flex items-start gap-2">
+                    <span
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                        status === "current"
+                          ? "bg-[#dcc4a6] text-[#1e3a0e] ring-2 ring-white"
+                          : status === "done"
+                          ? "bg-[#eef3e3] text-[#1e3a0e]"
+                          : "border border-white/70 text-white"
+                      }`}
+                    >
+                      {status === "done" ? (
+                        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                          <path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      ) : (
+                        num
+                      )}
+                    </span>
+                    {/* Labels need the room of a wider screen; phones get the title line above */}
+                    <span
+                      className={`hidden pt-1 text-xs leading-snug text-white sm:block ${
+                        status === "current" ? "font-bold underline decoration-[#dcc4a6] decoration-2 underline-offset-4" : "font-medium"
+                      }`}
+                    >
+                      {s.label}
+                    </span>
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
 
-        <div className="p-8 min-h-[360px] flex flex-col justify-between">
+        <div className="mt-6 flex min-h-[360px] flex-col justify-between rounded-xl bg-[#fffaf2] p-5 shadow-sm sm:mt-8 sm:p-8">
           {step === 1 && (
             <div className="space-y-6">
               <div>
@@ -753,7 +786,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
                       }
                       className={`p-3 rounded-lg border text-xs font-bold transition ${
                         answers.workMode === mode.id
-                          ? "border-[#19350C] bg-[#19350C] text-white"
+                          ? "border-[#657f31] bg-[#657f31] text-white"
                           : "border-[#19350C]/25 bg-white text-[#19350C] hover:bg-[#D5D3CC]/40"
                       }`}
                     >
@@ -778,7 +811,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
                         }
                         className={`p-2.5 rounded-lg border text-xs font-bold transition ${
                           answers.maxCommute === mins
-                            ? "border-[#687D31] bg-[#687D31] text-white"
+                            ? "border-[#657f31] bg-[#657f31] text-white"
                             : "border-[#19350C]/25 bg-white text-[#19350C] hover:bg-[#D5D3CC]/40"
                         }`}
                       >
@@ -851,7 +884,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
                       }
                       className={`p-3.5 rounded-lg border text-xs font-bold text-left transition ${
                         answers.householdType === opt.id
-                          ? "border-[#19350C] bg-[#19350C] text-white"
+                          ? "border-[#657f31] bg-[#657f31] text-white"
                           : "border-[#19350C]/25 bg-white text-[#19350C] hover:bg-[#D5D3CC]/40"
                       }`}
                     >
@@ -900,7 +933,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
                     }
                     className={`w-full p-4 rounded-lg border text-left transition ${
                       answers.topPriority === item.id
-                        ? "border-[#19350C] bg-[#19350C] text-white"
+                        ? "border-[#657f31] bg-[#657f31] text-white"
                         : "border-[#19350C]/25 bg-white text-[#19350C] hover:bg-[#D5D3CC]/40"
                     }`}
                   >
@@ -908,7 +941,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
                     <div
                       className={`text-xs mt-0.5 ${
                         answers.topPriority === item.id
-                          ? "text-[#D5D3CC]"
+                          ? "text-white"
                           : "text-[#406768]"
                       }`}
                     >
@@ -924,67 +957,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
             <div className="space-y-5">
               <div>
                 <h2 className="text-2xl font-bold text-[#19350C]">
-                  4. Select your safety and environmental requirements
-                </h2>
-                <p className="text-sm text-[#406768] mt-1">
-                  We will lower the match score of any ZIP code that does not meet these safety standards.
-                </p>
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-3">
-                {[
-                  {
-                    id: "lowPropertyCrime",
-                    title: "Low Property & Auto Theft",
-                    desc: "Filter out areas with elevated vehicle or residential break-ins.",
-                  },
-                  {
-                    id: "noFlood",
-                    title: "Low Flood & Weather Risk",
-                    desc: "Exclude high-risk FEMA flood zones and severe storm corridors.",
-                  },
-                  {
-                    id: "nightWalk",
-                    title: "Well-Lit Pedestrian Streets",
-                    desc: "Prioritize walkable blocks with active evening visibility.",
-                  },
-                  {
-                    id: "quietZoning",
-                    title: "Quiet Residential Zoning",
-                    desc: "Prefer lower traffic density and residential street layouts.",
-                  },
-                ].map((d) => (
-                  <button
-                    key={d.id}
-                    type="button"
-                    onClick={() => toggleItem("dealbreakers", d.id)}
-                    className={`p-4 rounded-lg border text-left transition ${
-                      answers.dealbreakers.includes(d.id)
-                        ? "border-[#687D31] bg-[#687D31] text-white"
-                        : "border-[#19350C]/25 bg-white text-[#19350C] hover:bg-[#D5D3CC]/40"
-                    }`}
-                  >
-                    <div className="text-sm font-bold">{d.title}</div>
-                    <div
-                      className={`text-xs mt-1 ${
-                        answers.dealbreakers.includes(d.id)
-                          ? "text-[#F4F3EE]"
-                          : "text-[#406768]"
-                      }`}
-                    >
-                      {d.desc}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {step === 5 && (
-            <div className="space-y-5">
-              <div>
-                <h2 className="text-2xl font-bold text-[#19350C]">
-                  5. What live events do you want to explore in your new city?
+                  4. What live events do you want to explore in your new city?
                 </h2>
                 <p className="text-sm text-[#406768] mt-1">
                   We connect directly with Ticketmaster to find upcoming events in your target state and city that match your interests.
@@ -1030,7 +1003,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
                     onClick={() => toggleItem("interests", tag.id)}
                     className={`p-3.5 rounded-lg border text-left transition ${
                       answers.interests.includes(tag.id)
-                        ? "border-[#406768] bg-[#406768] text-white"
+                        ? "border-[#657f31] bg-[#657f31] text-white"
                         : "border-[#19350C]/25 bg-white text-[#19350C] hover:bg-[#D5D3CC]/40"
                     }`}
                   >
@@ -1038,7 +1011,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
                     <div
                       className={`text-xs mt-1 ${
                         answers.interests.includes(tag.id)
-                          ? "text-[#D5D3CC]"
+                          ? "text-white"
                           : "text-[#406768]"
                       }`}
                     >
@@ -1050,7 +1023,7 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
             </div>
           )}
 
-          <div className="pt-6 mt-8 border-t border-[#19350C]/15 flex items-center justify-between">
+          <div className="pt-6 mt-8 border-t border-[#19350C]/15 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               {step > 1 && (
                 <button
@@ -1074,19 +1047,19 @@ export default function PreferenceQuestionnaire({ onComplete, onOpenMap }) {
               type="button"
               disabled={isLoadingZips}
               onClick={() =>
-                step === 5 ? calculateMatches() : setStep(step + 1)
+                step === STEPS.length ? calculateMatches() : setStep(step + 1)
               }
               className="px-6 py-3 rounded-lg bg-[#19350C] hover:bg-[#264d14] text-xs font-bold uppercase tracking-wider text-white shadow-sm transition disabled:opacity-50"
             >
               {isLoadingZips
                 ? "Analyzing Residential ZIP Codes..."
-                : step === 5
+                : step === STEPS.length
                 ? "Generate Recommendations"
                 : "Continue"}
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

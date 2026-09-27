@@ -2,12 +2,28 @@
 
 Neighborhood discovery for people who just moved. React + Vite, Supabase auth, Google Maps.
 
+Budgie's mascot is **Alberdie**, your Budgie companion: the budgie in the logo, the homepage tip, the
+and the business post helper. Use "Budgie" for the app and "Alberdie" only for the mascot or when speaking
+in the mascot's voice. The artwork is `public/ALBERDIE (2).png`. The budget advisor's guide (`#/budget`)
+uses the same artwork but is named Alberdy.
+
+Photo sources and licenses for images from outside the project are listed in
+[`mainpics/CREDITS.md`](mainpics/CREDITS.md).
+
 ```sh
 npm install
 npm run dev
 ```
 
 Browser config lives in `.env.local` (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_MAPS_BROWSER_KEY`, `VITE_MAP_ID`).
+
+## Budget advisor (`#/budget`)
+
+`src/BudgetPage.jsx`, ported from the `budgie_budget_advisor.html` prototype. The five state profiles (tax
+rate, utilities and groceries, example neighborhoods) are hardcoded estimates at the top of the file, not live
+data. Alberdy's chat replies are scripted templates filled in with the calculator's numbers, "Listen" uses the
+browser's speech synthesis, and the Mic button is a demo: it plays a listening state and then asks a preset
+question rather than recording audio.
 
 ## Business posts (Snowflake)
 

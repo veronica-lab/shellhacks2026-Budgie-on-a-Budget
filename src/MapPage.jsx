@@ -6,7 +6,7 @@ import EventCard from './EventCard';
 import HomeCard from './HomeCard';
 import { findNearbyZips } from './nearbyZips';
 import { useEvents } from './eventStore';
-import { CATEGORY_ICONS } from './eventCategories';
+import PinIcon from './PinIcon.jsx';
 import { fetchTicketmasterEvents } from './ticketmaster';
 import { fetchCommuteTimes } from './commute';
 import { fetchListings, formatPrice, median } from './listings';
@@ -17,9 +17,6 @@ const API_KEY = import.meta.env.VITE_MAPS_BROWSER_KEY;
 const MAP_ID = import.meta.env.VITE_MAP_ID;
 // Comparing just two homes keeps each comparison light on API calls
 const MAX_SAVED = 2;
-
-// Ticketmaster events can be "sports", which businesses can't post
-const PIN_ICONS = { ...CATEGORY_ICONS, sports: '🏟️' };
 
 // Green = comfortably under the limit, yellow = close to it, gray = still loading
 function dotColor(zip, maxCommute) {
@@ -39,10 +36,13 @@ function MapFocus({ focus }) {
   return null;
 }
 
+// Olive at 10% (90% see-through); the selected one gets a solid olive outline
 const toggleStyle = active => ({
   flex: 1, padding: '6px 8px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
-  borderRadius: 6, border: '1px solid #d1d5db',
-  background: active ? '#111' : '#f9fafb', color: active ? 'white' : '#111',
+  borderRadius: 6,
+  border: active ? '1px solid #657f31' : '1px solid rgba(101, 127, 49, 0.35)',
+  boxShadow: active ? 'inset 0 0 0 1px #657f31' : 'none',
+  background: 'rgba(101, 127, 49, 0.1)', color: '#1e3a0e',
 });
 
 const iconButtonStyle = {
@@ -50,11 +50,20 @@ const iconButtonStyle = {
   fontSize: 16, color: '#555', padding: '0 4px', lineHeight: 1,
 };
 
+// Coming from the quiz with coordinates: start centered on that ZIP
+function destinationFromZip(initialZip) {
+  if (!initialZip?.zip || initialZip.lat == null || initialZip.lng == null) return null;
+  return { label: `ZIP ${initialZip.zip}`, lat: initialZip.lat, lng: initialZip.lng };
+}
+
 export default function MapPage({ initialZip = null }) {
-  const [destination, setDestination] = useState(null);
+  const [destination, setDestination] = useState(() => destinationFromZip(initialZip));
   // ZIP handed over from the quiz; selected once the nearby ZIPs load
   const [pendingZip, setPendingZip] = useState(initialZip?.zip ?? null);
-  const [focus, setFocus] = useState(null);
+  const [focus, setFocus] = useState(() => {
+    const start = destinationFromZip(initialZip);
+    return start ? { lat: start.lat, lng: start.lng, zoom: 10 } : null;
+  });
   const [nearbyZips, setNearbyZips] = useState([]);
   const [commuteLoaded, setCommuteLoaded] = useState(false);
   const [maxCommute, setMaxCommute] = useState(30);
@@ -76,75 +85,102 @@ export default function MapPage({ initialZip = null }) {
   // Live posts published through the business page
   const { events: businessEvents } = useEvents();
 
-  // Coming from the quiz: center the search on that ZIP
-  const { zip: startZip, lat: startLat, lng: startLng } = initialZip ?? {};
-  useEffect(() => {
-    if (!startZip) return;
-    let cancelled = false;
-    const label = `ZIP ${startZip}`;
-    if (startLat != null && startLng != null) {
-      setDestination({ label, lat: startLat, lng: startLng });
-      return;
-    }
-    fetch('/zip-centroids.json')
-      .then(r => r.json())
-      .then(zips => {
-        const match = zips.find(z => z.zip === startZip);
-        if (!cancelled && match) setDestination({ label, lat: match.lat, lng: match.lng });
-      })
-      .catch(err => console.error('ZIP lookup error:', err));
-    return () => { cancelled = true; };
-  }, [startZip, startLat, startLng]);
-
-  // Once nearby ZIPs are in, open the card for the ZIP picked in the quiz
-  useEffect(() => {
-    if (!pendingZip || nearbyZips.length === 0) return;
-    const match = nearbyZips.find(z => z.zip === pendingZip);
-    if (match) {
-      setSelectedZip(match);
-      setFocus({ lat: match.lat, lng: match.lng, zoom: 12 });
-    }
-    setPendingZip(null);
-  }, [pendingZip, nearbyZips]);
-
-  // When a destination is picked: find nearby ZIPs, commute times, and real events
-  useEffect(() => {
-    if (!destination) return;
-    let cancelled = false;
+  // A new destination starts a fresh search: clear the old cards and results.
+  function chooseDestination(next) {
+    setDestination(next);
     setSelectedZip(null);
     setSelectedEvent(null);
     setHomes(null);
     setSelectedHome(null);
     setTmEvents([]);
     setCommuteLoaded(false);
-    setFocus({ lat: destination.lat, lng: destination.lng, zoom: 10 });
-
-    findNearbyZips(destination, 30).then(async zips => {
-  if (cancelled) return;
-  setNearbyZips(zips);
-  if (searchMode !== 'job') { setCommuteLoaded(true); return; } // no commute needed
-  try {
-    const times = await fetchCommuteTimes(destination, zips.slice(0, 150));
-    if (!cancelled) {
-      setNearbyZips(zips.map(z => ({ ...z, commute_mins: times[z.zip] ?? null })));
-      setCommuteLoaded(true);
-    }
-  } catch (err) {
-    console.error('Commute error:', err);
+    setFocus({ lat: next.lat, lng: next.lng, zoom: 10 });
   }
-});
 
+  // Switching modes needs commute times (job) or not (area), so the ZIPs reload.
+  function chooseSearchMode(mode) {
+    if (mode === searchMode) return;
+    setSearchMode(mode);
+    if (destination) setCommuteLoaded(false);
+  }
+
+  // Cards: opening one collapses the panel, so the panel never covers the card
+  function openZip(zip) {
+    setSelectedEvent(null);
+    setSelectedZip(zip);
+    setPanelOpen(false);
+  }
+
+  function openEvent(ev) {
+    setSelectedZip(null);
+    setSelectedEvent(ev);
+    setPanelOpen(false);
+  }
+
+  function openHome(home) {
+    setSelectedHome(home);
+    setPanelOpen(false);
+  }
+
+  // Coming from the quiz without coordinates: look the ZIP up, then center on it
+  const startZip = initialZip?.zip;
+  const needsLookup = startZip && destinationFromZip(initialZip) == null;
+  useEffect(() => {
+    if (!needsLookup) return undefined;
+    let cancelled = false;
+    fetch('/zip-centroids.json')
+      .then(r => r.json())
+      .then(zips => {
+        const match = zips.find(z => z.zip === startZip);
+        if (cancelled || !match) return;
+        setDestination({ label: `ZIP ${startZip}`, lat: match.lat, lng: match.lng });
+        setFocus({ lat: match.lat, lng: match.lng, zoom: 10 });
+      })
+      .catch(err => console.error('ZIP lookup error:', err));
+    return () => { cancelled = true; };
+  }, [needsLookup, startZip]);
+
+  // Once nearby ZIPs are in, open the card for the ZIP picked in the quiz.
+  // (Adjusting state while rendering, React's pattern for reacting to new data.)
+  if (pendingZip && nearbyZips.length > 0) {
+    const match = nearbyZips.find(z => z.zip === pendingZip);
+    setPendingZip(null);
+    if (match) {
+      openZip(match);
+      setFocus({ lat: match.lat, lng: match.lng, zoom: 12 });
+    }
+  }
+
+  // Nearby ZIPs for the destination, plus commute times when searching near a job
+  useEffect(() => {
+    if (!destination) return undefined;
+    let cancelled = false;
+    findNearbyZips(destination, 30).then(async zips => {
+      if (cancelled) return;
+      setNearbyZips(zips);
+      if (searchMode !== 'job') { setCommuteLoaded(true); return; } // no commute needed
+      try {
+        const times = await fetchCommuteTimes(destination, zips.slice(0, 150));
+        if (!cancelled) {
+          setNearbyZips(zips.map(z => ({ ...z, commute_mins: times[z.zip] ?? null })));
+          setCommuteLoaded(true);
+        }
+      } catch (err) {
+        console.error('Commute error:', err);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [destination, searchMode]);
+
+  // Real events around the destination
+  useEffect(() => {
+    if (!destination) return undefined;
+    let cancelled = false;
     fetchTicketmasterEvents(destination.lat, destination.lng, 30)
       .then(evts => { if (!cancelled) setTmEvents(evts); })
       .catch(err => console.error('Ticketmaster error:', err));
-
     return () => { cancelled = true; };
   }, [destination]);
-
-  // Collapse the panel whenever a card opens, so it never covers the card
-  useEffect(() => {
-    if (selectedZip || selectedEvent || selectedHome) setPanelOpen(false);
-  }, [selectedZip, selectedEvent, selectedHome]);
 
   function showHomes(zip, type) {
     setSelectedZip(null);
@@ -248,13 +284,13 @@ export default function MapPage({ initialZip = null }) {
           <div style={{ display: inHomesView ? 'none' : 'block' }}>
             <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
   <button
-    onClick={() => setSearchMode('job')}
+    onClick={() => chooseSearchMode('job')}
     style={toggleStyle(searchMode === 'job')}
   >
     Near my job
   </button>
   <button
-    onClick={() => setSearchMode('area')}
+    onClick={() => chooseSearchMode('area')}
     style={toggleStyle(searchMode === 'area')}
   >
     Explore an area
@@ -268,7 +304,7 @@ export default function MapPage({ initialZip = null }) {
                 <button style={iconButtonStyle} onClick={() => setPanelOpen(false)} title="Minimize">◂</button>
               )}
             </div>
-            <DestinationSearch onSelect={setDestination} />
+            <DestinationSearch onSelect={chooseDestination} />
 
             {nearbyZips.length > 0 && searchMode === 'job' && (
   <div style={{ marginTop: 8, fontSize: 14 }}>
@@ -369,7 +405,7 @@ export default function MapPage({ initialZip = null }) {
               key={z.zip}
               position={{ lat: z.lat, lng: z.lng }}
               title={z.zip}
-              onClick={() => { setSelectedEvent(null); setSelectedZip(z); }}
+              onClick={() => openZip(z)}
             >
               <div style={{
                 width: 14, height: 14, borderRadius: '50%', cursor: 'pointer',
@@ -386,7 +422,7 @@ export default function MapPage({ initialZip = null }) {
               position={{ lat: ev.lat, lng: ev.lng }}
               title={ev.title}
               zIndex={10}
-              onClick={() => { setSelectedZip(null); setSelectedEvent(ev); }}
+              onClick={() => openEvent(ev)}
             >
               <div style={{
                 width: 30, height: 30, borderRadius: '50%', cursor: 'pointer',
@@ -395,7 +431,7 @@ export default function MapPage({ initialZip = null }) {
                 background: ev.is_promoted ? '#f59e0b' : '#7c3aed',
                 boxShadow: ev.is_promoted ? '0 0 10px 3px rgba(245,158,11,0.6)' : '0 1px 4px rgba(0,0,0,0.3)',
               }}>
-                {PIN_ICONS[ev.category] ?? '📍'}
+                <PinIcon />
               </div>
             </AdvancedMarker>
           ))}
@@ -410,7 +446,7 @@ export default function MapPage({ initialZip = null }) {
                 position={{ lat: home.lat, lng: home.lng }}
                 title={home.address}
                 zIndex={isSelected ? 30 : isSaved ? 25 : 20}
-                onClick={() => setSelectedHome(home)}
+                onClick={() => openHome(home)}
               >
                 <div style={{
                   background: isSaved ? '#9333ea' : isSelected ? '#111' : (homes.type === 'rent' ? '#0d9488' : '#2563eb'),

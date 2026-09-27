@@ -1,17 +1,20 @@
 /* Business page ("#/business", BusinessPage.jsx). Uses tokens from Home.css. */
 
+.biz {
+  /* Field outlines need 3:1 against white; --line is for dividers on cream */
+  --field-line: #978a74;
+}
+
 .biz:focus {
   outline: none;
 }
 
-/* ---------- Hero: olive like the homepage, with Budgie front and center ---------- */
+/* ---------- Hero: the homepage split, with a storefront photo and a small Alberdie tip ---------- */
 
 .biz-hero {
   display: grid;
-  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
-  align-items: center;
-  gap: clamp(24px, 5vw, 72px);
-  padding: clamp(40px, 6vw, 88px) var(--gutter);
+  grid-template-columns: 45fr 55fr;
+  min-height: clamp(560px, calc(100svh - var(--header-h, var(--nav-h))), 680px);
   background: var(--olive);
   color: var(--white);
 }
@@ -20,107 +23,106 @@
   outline-color: var(--white);
 }
 
-.biz-hero__copy {
-  max-width: 36em;
-  justify-self: end;
+.biz-hero__media {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* Crops toward the patio tables rather than the upper windows */
+.biz-hero__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 38% 72%;
+}
+
+.biz-hero__credit {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 28px 14px 8px;
+  background: linear-gradient(transparent, rgb(0 0 0 / 0.6));
+  font-size: 0.78rem;
+  line-height: 1.4;
+  text-align: right;
+}
+
+.biz-hero__credit a {
+  text-underline-offset: 2px;
+}
+
+.biz-hero__panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px var(--gutter);
+  text-align: center;
+}
+
+.biz-hero__content {
+  max-width: 600px;
 }
 
 .biz-hero__eyebrow {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
+/* Same headline treatment as .hero__title: bold white type over a short white rule */
 .biz-hero__title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin: 0;
-  font-size: clamp(2.2rem, 5vw, 4rem);
-  line-height: 1.05;
-  letter-spacing: -0.02em;
+  font-size: clamp(2.2rem, 4.4vw, 3.8rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
 }
 
 .biz-hero__title::after {
   content: "";
   display: block;
-  width: min(200px, 45%);
+  width: min(230px, 45%);
   height: 2px;
-  margin-top: 16px;
+  margin-top: 14px;
   background: var(--white);
 }
 
 .biz-hero__text {
-  margin: 24px 0 32px;
+  max-width: 32em;
+  margin: 28px auto 36px;
   font-size: clamp(1.05rem, 1.35vw, 1.2rem);
   font-weight: 600;
   line-height: 1.5;
 }
 
 .biz-hero__cta {
-  min-height: 58px;
-  padding: 12px 32px;
-  border-color: var(--cream);
-  background: var(--cream);
-  color: var(--forest);
   font-family: inherit;
-  font-size: 1.15rem;
-  font-weight: 700;
   cursor: pointer;
 }
 
-.biz-hero__cta:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+/* The homepage's .tip, sized down as an accent under the button */
+.biz-hero__tip {
+  margin: 36px auto 0;
+  max-width: 26em;
+  border: 0;
+  text-align: left;
 }
 
-.biz-hero__kinds {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 28px 0 0;
-  padding: 0;
-  list-style: none;
+.biz-hero__tip .tip__mascot {
+  height: 44px;
 }
 
-.biz-hero__kinds li {
-  padding: 4px 14px;
-  border: 1.5px solid rgb(255 255 255 / 0.7);
-  border-radius: 999px;
+.biz-hero__tip .tip__text {
   font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.biz-hero__art {
-  position: relative;
-  justify-self: start;
-  display: grid;
-  place-items: center;
-  width: min(100%, 360px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--cream);
-}
-
-.biz-hero__bird {
-  width: auto;
-  height: 72%;
-  transform: translateY(6%);
-}
-
-.biz-hero__bubble {
-  position: absolute;
-  top: 2%;
-  right: -4%;
-  max-width: 11em;
-  margin: 0;
-  padding: 10px 14px;
-  border: 2px solid var(--forest);
-  border-radius: 16px 16px 16px 4px;
-  background: var(--white);
-  color: var(--forest);
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1.3;
 }
 
 /* ---------- Post form ---------- */
@@ -135,11 +137,16 @@
 }
 
 .biz-post__title {
-  margin-bottom: 24px;
+  margin-bottom: 14px;
 }
 
 .biz-post__title:focus {
   outline: none;
+}
+
+.biz-post__lead {
+  max-width: 36em;
+  margin-bottom: 8px;
 }
 
 .biz-form {
@@ -148,7 +155,7 @@
 }
 
 .biz-form > .auth__notice {
-  margin: 0;
+  margin: 16px 0 0;
 }
 
 .biz-published:focus {
@@ -156,43 +163,123 @@
   outline-offset: 2px;
 }
 
-/* One composer: the form on the left, the live resident card on the right */
+/* Steps 1–3 on the left, step 4 (preview + publish) beside them */
 .biz-compose {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  gap: 24px;
+  gap: clamp(32px, 5vw, 72px);
   align-items: start;
 }
 
-.biz-card {
-  max-width: none;
-}
-
-.biz-fields {
+/* Each step is divided by a rule, like the phases on the homepage, not boxed in a card */
+.biz-step {
+  min-width: 0;
   margin: 0;
+  padding: 28px 0 10px;
+  border: 0;
+  border-top: 1px solid var(--line);
 }
 
-.biz-fields > .field:last-child {
-  margin-bottom: 0;
+/* Floated so the legend sits inside the padding instead of on the border */
+.biz-step > .biz-step__legend {
+  float: left;
+  width: 100%;
+  padding: 0;
 }
 
-/* "What's happening?" + the AI helper, in a dashed Budgie note like the homepage tip */
+.biz-step > .biz-step__legend + * {
+  clear: both;
+}
+
+.biz-step__legend {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 20px;
+  font-weight: 700;
+}
+
+.biz-step__num {
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--forest);
+}
+
+.biz-step__title {
+  font-size: 1.45rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.biz-step__optional {
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+/* Larger, sentence-case labels and roomier fields than the log-in form */
+.biz-form .field {
+  margin-bottom: 22px;
+}
+
+.biz-form .field label {
+  margin-bottom: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+}
+
+.biz-form .field input,
+.biz-form .field select,
+.biz-form .field textarea {
+  min-height: 54px;
+  padding: 12px 16px;
+  border-color: var(--field-line);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.biz-form .field textarea {
+  min-height: 150px;
+}
+
+.biz-form .field [aria-invalid="true"] {
+  border-color: #9b2c1f;
+}
+
+.biz-form .field ::placeholder {
+  color: #6f7468;
+}
+
+.biz-form .field__hint,
+.biz-form .field__error {
+  font-size: 0.92rem;
+}
+
+.biz-form .portal__row {
+  gap: 0 18px;
+}
+
+/* "What's happening?" + the AI helper, in a dashed note like Alberdie's tip on the homepage */
 .biz-helper {
-  margin-bottom: 18px;
-  padding: 16px;
+  margin-bottom: 22px;
+  padding: 18px;
   border: 1.5px dashed var(--olive);
   border-radius: 14px;
-  background: var(--cream);
+  background: var(--cream-card);
 }
 
 .biz-helper .field {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .biz-helper__row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .biz-helper__bird {
@@ -209,7 +296,7 @@
 .biz-helper__btn {
   flex-shrink: 0;
   gap: 10px;
-  min-height: 46px;
+  min-height: 48px;
   margin: 0;
   border-color: var(--olive);
   background: var(--olive);
@@ -245,22 +332,47 @@
   margin: 0 0 18px;
 }
 
-.biz-submit .biz-error {
+/* ---------- Step 4: review and publish ---------- */
+
+.biz-review {
+  position: sticky;
+  top: calc(var(--header-h, var(--nav-h)) + 16px);
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+}
+
+.biz-review__lead {
+  margin: 0 0 18px;
+  color: var(--ink-muted);
+}
+
+/* A slice of the Community page: light green backdrop, its heading style, then the real card */
+.biz-review__feed {
+  margin-bottom: 20px;
+  padding: 18px;
+  background: #dfe8c8;
+  border-radius: 6px;
+}
+
+.biz-review__feed-head {
+  margin: 0 0 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--forest);
+}
+
+.biz-review .feed-card {
+  box-shadow: 0 6px 24px rgb(30 58 14 / 0.12);
+  overflow-wrap: anywhere;
+}
+
+.biz-review .biz-error {
   margin-bottom: 14px;
 }
 
-.biz-preview__card {
-  position: sticky;
-  top: calc(var(--header-h, var(--nav-h)) + 16px);
-}
-
-.biz-preview__card .feed-card {
-  box-shadow: 0 6px 24px rgb(30 58 14 / 0.08);
-}
-
 .biz-publish {
-  width: auto;
-  min-width: 260px;
   margin: 0;
 }
 
@@ -270,59 +382,67 @@
 
 /* ---------- Responsive ---------- */
 
-@media (max-width: 860px) {
-  .biz-hero {
-    grid-template-columns: 1fr;
-  }
-
-  .biz-hero__copy {
-    justify-self: start;
-  }
-
-  .biz-hero__art {
-    grid-row: 1;
-    justify-self: center;
-    width: min(60vw, 240px);
-  }
-
-  .biz-hero__bubble {
-    right: -18%;
-    font-size: 0.85rem;
-  }
-
+@media (max-width: 960px) {
   .biz-compose {
     grid-template-columns: 1fr;
   }
 
-  .biz-preview__card {
+  .biz-review {
     position: static;
   }
 }
 
-@media (max-width: 520px) {
-  .biz-hero__bubble {
-    display: none;
+/* Stacks like the homepage hero: photo on top at its own ratio, then the olive panel */
+@media (max-width: 760px) {
+  .biz-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
   }
 
+  .biz-hero__media {
+    aspect-ratio: 16 / 10;
+  }
+
+  .biz-hero__panel {
+    padding: 40px var(--gutter) 48px;
+  }
+
+  .biz-hero__text {
+    margin: 22px auto 28px;
+  }
+
+  .biz-hero__tip {
+    margin-top: 28px;
+  }
+}
+
+@media (max-width: 520px) {
   .biz-hero__cta,
   .biz-publish {
     width: 100%;
-    min-width: 0;
+  }
+
+  .biz-hero__credit {
+    font-size: 0.72rem;
   }
 
   .biz-helper {
-    padding: 12px;
+    padding: 14px;
   }
 
   .biz-helper__row {
     flex-wrap: wrap;
   }
 
-  .biz-helper__bird {
-    display: none;
+  .biz-helper__text {
+    flex-basis: calc(100% - 58px);
   }
 
   .biz-helper__btn {
     width: 100%;
+  }
+
+  .biz-review__feed {
+    padding: 12px;
   }
 }

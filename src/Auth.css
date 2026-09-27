@@ -1,4 +1,4 @@
-/* We Movers — log in / sign up (imported by AuthPage.jsx). Uses tokens from Home.css. */
+/* Budgie — log in / sign up (imported by AuthPage.jsx). Uses tokens from Home.css. */
 
 .auth {
   display: grid;
@@ -6,15 +6,26 @@
   min-height: calc(100svh - var(--header-h, var(--nav-h)));
 }
 
-/* Olive side panel, echoing the homepage hero */
+/* Photo side panel, darkened so the white text stays readable: a bluebird home at its
+   birdhouse for log in, one flying in to it for sign up */
 .auth__panel {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 48px var(--gutter);
-  background: var(--olive);
+  background:
+    linear-gradient(rgb(20 32 10 / 0.5), rgb(20 32 10 / 0.5)),
+    url("/Eastern-bluebird-on-birdhouse-Shutterstock.jpg") 50% center / cover no-repeat,
+    var(--forest);
   color: var(--white);
   text-align: center;
+}
+
+.auth--signup .auth__panel {
+  background:
+    linear-gradient(rgb(20 32 10 / 0.5), rgb(20 32 10 / 0.5)),
+    url("/images%20(1).jpg") 70% center / cover no-repeat,
+    var(--forest);
 }
 
 .auth__panel-content {

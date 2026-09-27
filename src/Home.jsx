@@ -6,7 +6,8 @@ import streetFairPhoto from '../mainpics/Community Gathering.jpg';
 import rooftopPhoto from '../mainpics/0712vo3.jpg';
 import conferencePhoto from '../mainpics/Event_Technology_Trends-Cvent_CONNECT_2023.jpg';
 import { supabase } from './supabaseClient.js';
-import EventsNearYou from './EventsNearYou.jsx';
+import './Portal.css';
+import EventFeedCard from './EventFeedCard.jsx';
 
 const HERO_SLIDES = [
   {
@@ -117,6 +118,59 @@ function HeroCarousel() {
   );
 }
 
+// Signed-in visitors see a user icon; it opens a small panel with their email.
+function UserMenu({ email }) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef(null);
+  const buttonRef = useRef(null);
+
+  // Close on a click outside, or on Escape (focus goes back to the icon).
+  useEffect(() => {
+    if (!open) return undefined;
+    const onPointerDown = (e) => {
+      if (!wrapRef.current.contains(e.target)) setOpen(false);
+    };
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setOpen(false);
+        buttonRef.current.focus();
+      }
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown, true);
+    };
+  }, [open]);
+
+  return (
+    <div className="nav__user" ref={wrapRef}>
+      <button
+        ref={buttonRef}
+        className="nav__user-btn"
+        type="button"
+        aria-expanded={open}
+        aria-controls="nav-user-panel"
+        aria-label="Your account"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="8.5" r="3.6" />
+          <path d="M5 19.5c1.2-3.4 4-5.2 7-5.2s5.8 1.8 7 5.2" />
+        </svg>
+      </button>
+      {open && (
+        <div className="nav__user-panel" id="nav-user-panel">
+          <p className="nav__user-label">Signed in as</p>
+          <p className="nav__user-email">{email}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AccountLinks({ session, authLoading, current }) {
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState('');
@@ -135,7 +189,7 @@ function AccountLinks({ session, authLoading, current }) {
   if (session) {
     return (
       <div className="nav__account">
-        <span className="nav__user" title={session.user.email}>{session.user.email}</span>
+        <UserMenu email={session.user.email} />
         <button className="pill pill--outline" type="button" onClick={signOut} disabled={signingOut}>
           {signingOut ? 'Logging out…' : 'Log out'}
         </button>
@@ -243,7 +297,11 @@ export function SiteHeader({ session = null, authLoading = false, current }) {
     >
       <nav className="nav" aria-label="Main">
         <a className="brand" href="#top">
-          <img className="brand__logo" src="/ALBERDIE%20(2).png" alt="Budgie logo" width="1308" height="1497" />
+          {/* The link's text names the site, so the bird is decorative here */}
+          <img className="brand__logo" src="/ALBERDIE%20(2).png" alt="" width="1308" height="1497" />
+          <span className="brand__text">
+            <span className="brand__name">Budgie on a Budget</span>
+          </span>
         </a>
 
         <button
@@ -260,8 +318,16 @@ export function SiteHeader({ session = null, authLoading = false, current }) {
 
         <div className={`nav__menu${menuOpen ? ' is-open' : ''}`} id="nav-menu" onClick={closeOnLink}>
           <ul className="nav__links">
+            <li>
+              <a className="nav__home" href="#top" aria-current={current === 'home' ? 'page' : undefined}>
+                <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" focusable="false">
+                  <path d="M3 9.5 10 3.5l7 6V17h-4.5v-4.5h-5V17H3z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                </svg>
+                Home
+              </a>
+            </li>
             <li><a href="#/community" aria-current={current === 'community' ? 'page' : undefined}>Community</a></li>
-            <li><a href="#/budget">Budget advisor</a></li>
+            <li><a href="#/budget" aria-current={current === 'budget' ? 'page' : undefined}>Budget advisor</a></li>
             <li><a href="#/business" aria-current={current === 'business' ? 'page' : undefined}>Advertise with us</a></li>
             <li><a href="#/map">Explore map</a></li>
           </ul>
@@ -290,8 +356,8 @@ function Hero() {
       <div className="hero__panel">
         <div className={`hero__content${animateIn ? ' hero__content--enter' : ''}`}>
           <h1 className="hero__title" id="hero-title">
-            <span className="hero__title-small">Find your place</span>
-            <span className="hero__title-big">Find your people</span>
+            <span className="hero__title-small">Find a place you love.</span>
+            <span className="hero__title-big">Stay within your&nbsp;budget.</span>
           </h1>
           <p className="hero__text">
             Moving is more than finding an address. Discover neighborhoods that fit your life,
@@ -308,68 +374,218 @@ function Hero() {
   );
 }
 
-function HowItWorks() {
+/// ---------- How it works: a three-slide feature carousel ----------
+// The track is a native scroll-snap row, so every slide is plain content that can be
+// swiped or scrolled; the buttons, counter and arrow keys are an enhancement on top.
+// Preview numbers are examples and labeled as such.
+
+// ZIP dots around a work pin, colored by commute time like the map's own legend
+const MAP_DOTS = [
+  [300, 150, 'near'], [352, 118, 'near'], [396, 170, 'near'], [330, 206, 'near'], [420, 226, 'near'], [262, 196, 'near'],
+  [224, 106, 'far'], [460, 96, 'far'], [492, 188, 'far'], [240, 262, 'far'], [372, 286, 'far'], [498, 276, 'far'], [180, 170, 'far'],
+];
+
+function MapVisual() {
   return (
-    <section className="intro" id="how-it-works" aria-labelledby="intro-title">
-      <div className="intro__inner">
-        <div className="intro__copy">
+    <div className="slide-map">
+      <svg className="slide-map__art" viewBox="0 0 560 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+        <rect width="560" height="360" className="slide-map__land" />
+        <path className="slide-map__park" d="M40 40h110v70H40zM452 24h92v64h-92zM70 290h120v60H70z" />
+        <path className="slide-map__water" d="M470 360c-12-60 20-104 90-118v118z" />
+        <path className="slide-map__road slide-map__road--major" d="M0 176h560M348 0v360" />
+        <path className="slide-map__road" d="M0 60h560M0 300h560M120 0v360M470 0v360M30 360L520 0" />
+        <circle cx="348" cy="176" r="126" className="slide-map__radius" />
+        {MAP_DOTS.map(([x, y, kind]) => (
+          <circle key={`${x}-${y}`} cx={x} cy={y} r="11" className={`slide-map__dot slide-map__dot--${kind}`} />
+        ))}
+        <image href="/pinpoint.png" x="332" y="136" width="32" height="37" />
+      </svg>
+
+      {/* The map's search panel, as it looks on the real page */}
+      <div className="slide-map__panel">
+        <span className="slide-tag">Example</span>
+        <div className="slide-map__toggles">
+          <span className="is-on">Near my job</span>
+          <span>Explore an area</span>
+        </div>
+        <p className="slide-map__label">Where do you work or study?</p>
+        <p className="slide-map__field">Brickell, Miami, FL</p>
+        <p className="slide-map__status">Max commute <strong>30 min</strong><br />11 areas &middot; 8 events</p>
+        <p className="slide-map__legend">
+          <span><i className="slide-map__swatch slide-map__swatch--near"></i>under 18 min</span>
+          <span><i className="slide-map__swatch slide-map__swatch--far"></i>up to 30 min</span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// Budget Advisor defaults: $1,850 rent on $65,000 in Florida (17.5% tax, $750 basics)
+function BudgetVisual() {
+  const fill = ((1850 - 900) / (4200 - 900)) * 100;
+  return (
+    <div className="slide-budget">
+      <p className="slide-budget__label"><span className="slide-tag slide-tag--dark">Example</span> Salary needed for $1,850/mo rent</p>
+      <p className="slide-budget__figure">$74,000<span>/yr</span></p>
+      <div className="slide-budget__slider" aria-hidden="true">
+        <span className="slide-budget__track" style={{ '--fill': `${fill}%` }}></span>
+        <span className="slide-budget__ticks"><span>$900</span><span>$4,200</span></span>
+      </div>
+      <dl className="slide-budget__rows">
+        <div><dt>Take-home on $65,000</dt><dd>$4,469</dd></div>
+        <div><dt>Rent</dt><dd>&minus;$1,850</dd></div>
+        <div><dt>Utilities &amp; groceries</dt><dd>&minus;$750</dd></div>
+        <div className="slide-budget__total"><dt>Left each month</dt><dd>$1,869</dd></div>
+      </dl>
+      <p className="slide-budget__upfront">Move-in cash: <strong>$5,150</strong> &middot; save $1,288/mo for 4 months</p>
+    </div>
+  );
+}
+
+// Two posts drawn with the community feed's own card
+const EXAMPLE_POSTS = [
+  {
+    category: 'market',
+    title: 'Saturday farmers market',
+    business_name: 'Coral Way Growers',
+    date_time: 'Sat, 9 AM',
+    zip_code: '33145',
+  },
+  {
+    category: 'music',
+    title: 'Porch concert & block potluck',
+    business_name: 'Corner Café',
+    date_time: 'Fri, 6 PM',
+    zip_code: '33145',
+    new_mover_perk: 'Free coffee your first week',
+    attendees_count: 14,
+  },
+];
+
+function CommunityVisual() {
+  return (
+    <div className="slide-feed">
+      <span className="slide-tag slide-tag--light">Example posts</span>
+      <div className="slide-feed__stack">
+        {EXAMPLE_POSTS.map((post) => <EventFeedCard key={post.title} event={post} as="div" />)}
+      </div>
+    </div>
+  );
+}
+
+const SLIDES = [
+  {
+    id: 'find',
+    kicker: 'Find',
+    title: 'Find a place that fits',
+    text: 'Tell the map where you work and how far you’ll commute. It shows which ZIP codes fit, with rentals and events in each.',
+    href: '#/map',
+    cta: 'Explore the map',
+    Visual: MapVisual,
+  },
+  {
+    id: 'plan',
+    kicker: 'Plan',
+    title: 'Plan what it costs',
+    text: 'Slide rent and income to see the salary you’d need, what’s left each month, and the cash to move in.',
+    href: '#/budget',
+    cta: 'Open Budget Advisor',
+    Visual: BudgetVisual,
+  },
+  {
+    id: 'settle',
+    kicker: 'Settle in',
+    title: 'Feel at home sooner',
+    text: 'See events and new-neighbor perks that local businesses post near your ZIP.',
+    href: '#/community',
+    cta: 'Browse local events',
+    Visual: CommunityVisual,
+  },
+];
+
+const pad = (n) => String(n).padStart(2, '0');
+
+function HowItWorks() {
+  const trackRef = useRef(null);
+  const [active, setActive] = useState(0);
+  const reducedMotion = usePrefersReducedMotion();
+
+  // The counter follows the scroll position, however the visitor got there.
+  // With three slides this is cheap enough to run on every scroll event.
+  useEffect(() => {
+    const track = trackRef.current;
+    const onScroll = () => {
+      const slides = [...track.children];
+      let nearest = 0;
+      slides.forEach((slide, i) => {
+        if (Math.abs(slide.offsetLeft - track.scrollLeft) < Math.abs(slides[nearest].offsetLeft - track.scrollLeft)) nearest = i;
+      });
+      // At the far end the last slide can't reach the snap point, so count it as reached.
+      if (track.scrollLeft + track.clientWidth >= track.scrollWidth - 2) nearest = slides.length - 1;
+      setActive(nearest);
+    };
+    track.addEventListener('scroll', onScroll, { passive: true });
+    return () => track.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const goTo = (index) => {
+    const track = trackRef.current;
+    const i = Math.max(0, Math.min(SLIDES.length - 1, index));
+    setActive(i); // update the counter now, not when a smooth scroll settles
+    track.scrollTo({ left: track.children[i].offsetLeft, behavior: reducedMotion ? 'auto' : 'smooth' });
+  };
+
+  const onKeyDown = (e) => {
+    const moves = { ArrowRight: active + 1, ArrowLeft: active - 1, Home: 0, End: SLIDES.length - 1 };
+    if (!(e.key in moves)) return;
+    e.preventDefault();
+    goTo(moves[e.key]);
+  };
+
+  return (
+    <section className="intro journey" id="how-it-works" aria-labelledby="intro-title">
+      <div className="journey__head">
+        <div>
           <p className="eyebrow">How it works</p>
-          <h2 className="intro__title" id="intro-title">From first search to first&nbsp;hello.</h2>
+          <h2 className="intro__title" id="intro-title">
+            {/* Each sentence stays whole, so a wrap falls between them */}
+            <span className="nowrap">Find your place.</span> <span className="nowrap">Find your people.</span>
+          </h2>
           <p className="intro__lead">
-            Moving is two jobs: choosing the right place, then making it yours. Budgie helps with both.
+            Explore where you could live, understand what it might cost, and discover what&rsquo;s nearby when you arrive.
           </p>
-          <dl className="phases">
-            <div className="phase">
-              <dt>Before the move</dt>
-              <dd>Compare neighborhoods by budget, commute, and what matters to you.</dd>
-            </div>
-            <div className="phase">
-              <dt>After the move</dt>
-              <dd>Find local events, businesses, and neighbors nearby.</dd>
-            </div>
-          </dl>
-
-          <aside className="tip" aria-label="Budgie tip">
-            {/* Decorative: the text already names Budgie, so the mascot adds nothing for screen readers */}
-            <img className="tip__mascot" src="/ALBERDIE%20(2).png" alt="" width="1308" height="1497" loading="lazy" />
-            <p className="tip__text">
-              <strong className="tip__label">Budgie tip:</strong> Start with what matters most to you&#8288;&mdash;your
-              budget, your commute, or the kind of community you want nearby.
-            </p>
-          </aside>
         </div>
 
-        {/* Product preview. Everything in here is demo content, not real listings. */}
-        <div className="preview" role="group" aria-label="Product preview with demo content">
-          <p className="preview__note">Preview &middot; demo content</p>
+        <div className="journey__controls">
+          <p className="journey__count" aria-live="polite">
+            <span className="visually-hidden">Slide </span>
+            <strong>{pad(active + 1)}</strong> <span aria-hidden="true">/</span><span className="visually-hidden"> of</span> {pad(SLIDES.length)}
+          </p>
+          <button className="journey__btn" type="button" onClick={() => goTo(active - 1)} disabled={active === 0}
+            aria-controls="journey-track" aria-label="Previous slide">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" /></svg>
+          </button>
+          <button className="journey__btn" type="button" onClick={() => goTo(active + 1)} disabled={active === SLIDES.length - 1}
+            aria-controls="journey-track" aria-label="Next slide">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7" /></svg>
+          </button>
+        </div>
+      </div>
 
-          <article className="snip snip--match" id="explore-neighborhoods" aria-labelledby="demo-match">
-            <div className="snip__head">
-              <p className="snip__kind">Neighborhood match</p>
-              <span className="snip__demo">Demo</span>
+      <div className="journey__track" id="journey-track" ref={trackRef} tabIndex={0} onKeyDown={onKeyDown}
+        role="region" aria-roledescription="carousel" aria-label="How Budgie works. Use the arrow keys to move between slides.">
+        {SLIDES.map(({ id, kicker, title, text, href, cta, Visual }, i) => (
+          <article key={id} className={`slide slide--${id}`} role="group" aria-roledescription="slide"
+            aria-labelledby={`slide-${id}-title`}>
+            <div className="slide__copy">
+              <p className="slide__kicker">{pad(i + 1)} &mdash; {kicker}</p>
+              <h3 className="slide__title" id={`slide-${id}-title`}>{title}</h3>
+              <p className="slide__text">{text}</p>
+              <a className="slide__link" href={href}>{cta} <span aria-hidden="true">&rarr;</span></a>
             </div>
-            <div className="snip__title-row">
-              <h3 className="snip__title" id="demo-match">Linden Hill</h3>
-              <p className="snip__score"><strong>92%</strong> match</p>
-            </div>
-            <dl className="facts">
-              <div><dt>Rent</dt><dd>$1,850/mo for a 1BR, under your $2,100 budget</dd></div>
-              <div><dt>Commute</dt><dd>24 min by train to your new office</dd></div>
-              <div><dt>Priorities</dt><dd>Parks, walkable caf&eacute;s, quiet streets</dd></div>
-            </dl>
+            <div className="slide__visual"><Visual /></div>
           </article>
-
-          {/* Location motif: dotted route from the match to a pin on the event */}
-          <svg className="route" viewBox="0 0 96 56" aria-hidden="true" focusable="false">
-            <path className="route__line" d="M6,0 C2,18 30,22 46,26 C64,31 84,34 88,48"></path>
-            <circle className="route__pin" cx="88" cy="50" r="5"></circle>
-          </svg>
-
-          {/* Not id="community": "#community" routes to the Community page */}
-          <div id="events-near-you">
-            <EventsNearYou />
-          </div>
-        </div>
+        ))}
       </div>
     </section>
   );
@@ -390,7 +606,7 @@ export default function Home({ session, authLoading }) {
   return (
     <>
       <a className="skip-link" href="#main">Skip to content</a>
-      <SiteHeader session={session} authLoading={authLoading} />
+      <SiteHeader session={session} authLoading={authLoading} current="home" />
       <main id="main">
         <Hero />
         <HowItWorks />

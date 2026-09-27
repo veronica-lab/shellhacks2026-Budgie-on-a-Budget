@@ -18,7 +18,7 @@ const COPY = {
     submitting: 'Logging in…',
   },
   signup: {
-    eyebrow: 'Join We Movers',
+    eyebrow: 'Join Budgie',
     title: 'Create your account',
     lead: 'Save neighborhoods you like and find the people who make a place feel like home.',
     submit: 'Sign up',
@@ -185,7 +185,7 @@ export default function AuthPage({ mode, initialError = '' }) {
     <>
       <a className="skip-link" href="#main">Skip to content</a>
       <SiteHeader current={mode} />
-      <main className="auth" id="main">
+      <main className={`auth auth--${mode}`} id="main">
         <section className="auth__panel" aria-labelledby="auth-title">
           <div className="auth__panel-content">
             <p className="auth__eyebrow">{copy.eyebrow}</p>
@@ -263,7 +263,7 @@ export default function AuthPage({ mode, initialError = '' }) {
                 {isSignup ? (
                   <>Already have an account? <a href="#/login">Log in</a></>
                 ) : (
-                  <>New to We Movers? <a href="#/signup">Create an account</a></>
+                  <>New to Budgie? <a href="#/signup">Create an account</a></>
                 )}
               </p>
             </form>

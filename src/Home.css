@@ -1,4 +1,4 @@
-/* We Movers — homepage styles (imported by Home.jsx) */
+/* Budgie — homepage styles (imported by Home.jsx) */
 
 :root {
   /* Figma palette */
@@ -17,7 +17,7 @@
 
   --nav-h: 72px;
   --gutter: clamp(20px, 4vw, 56px);
-  --font: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font: "Public Sans", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
 }
 
 *,
@@ -113,9 +113,34 @@ a {
 }
 
 .brand {
+  display: flex;
   flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
   border-radius: 8px;
+  color: var(--forest);
+  text-decoration: none;
 }
+
+/* Site name beside the bird */
+.brand__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.brand__name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.brand:hover .brand__name {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 
 .brand__logo {
   display: block;
@@ -126,28 +151,38 @@ a {
 .nav__menu {
   display: flex;
   flex: 1;
+  gap: 24px;
   align-items: center;
 }
 
 .nav__links {
   display: flex;
   gap: 16px;
-  margin: 0 auto;
+  margin: 0 0 0 auto;
   padding: 0;
   list-style: none;
 }
 
 .nav__links a {
   display: inline-block;
-  padding: 6px 12px;
-  border-radius: 2px;
-  background: var(--chip);
+  padding: 6px 16px;
+  border-radius: 10px; /* half of a full pill */
+  background: var(--cream);
   color: var(--ink);
   font-size: 1rem;
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
   transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* Home stands out from the other chips so it's easy to find from any page */
+.nav__links a.nav__home {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--olive);
+  color: var(--white);
 }
 
 .nav__links a:hover,
@@ -211,15 +246,63 @@ button.pill:disabled {
   text-underline-offset: 3px;
 }
 
-/* Signed-in email next to "Log out" */
+/* Signed in: a user icon next to "Log out"; it opens a small panel with the email */
 .nav__user {
-  max-width: 16em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.9rem;
-  font-weight: 500;
+  position: relative;
+}
+
+.nav__user-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1.5px solid var(--forest);
+  border-radius: 50%;
+  background: transparent;
   color: var(--forest);
+  cursor: pointer;
+}
+
+.nav__user-btn svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.nav__user-btn:hover,
+.nav__user-btn[aria-expanded="true"] {
+  background: var(--forest);
+  color: var(--white);
+}
+
+.nav__user-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 60;
+  width: max-content;
+  min-width: 200px;
+  max-width: min(320px, calc(100vw - 32px));
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--cream-card);
+  box-shadow: 0 8px 24px rgb(27 36 21 / 0.16);
+}
+
+.nav__user-label {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}
+
+.nav__user-email {
+  margin: 2px 0 0;
+  font-weight: 600;
+  color: var(--forest);
+  overflow-wrap: anywhere;
 }
 
 .nav__error {
@@ -426,11 +509,11 @@ button.pill:disabled {
 }
 
 .hero__title-small {
-  font-size: clamp(1.85rem, 3.6vw, 3.4rem);
+  font-size: clamp(1.6rem, 3vw, 2.75rem);
 }
 
 .hero__title-big {
-  font-size: clamp(2.3rem, 5.2vw, 4.9rem);
+  font-size: clamp(2rem, 4.2vw, 3.9rem);
 }
 
 .hero__title::after {
@@ -504,14 +587,9 @@ button.pill:disabled {
   padding: clamp(36px, 5vw, 64px) var(--gutter) clamp(56px, 7vw, 96px);
 }
 
-/* Asymmetrical: editorial copy on the left, a small demo preview on the right */
-.intro__inner {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-  gap: clamp(40px, 6vw, 88px);
-  align-items: center;
-  max-width: 1120px;
-  margin: 0 auto;
+/* Keeps a phrase on one line; wrapping happens between phrases */
+.nowrap {
+  white-space: nowrap;
 }
 
 .eyebrow {
@@ -537,29 +615,7 @@ button.pill:disabled {
   color: var(--ink-muted);
 }
 
-.phases {
-  margin: 0;
-}
-
-.phase {
-  padding: 14px 0;
-  border-top: 1px solid var(--line);
-}
-
-.phase dt {
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--forest);
-}
-
-.phase dd {
-  margin: 2px 0 0;
-  font-size: 1.05rem;
-}
-
-/* Budgie tip: a small note tucked under the phases, not a feature card */
+/* Alberdie's tip: a small dashed note, not a feature card (business page) */
 .tip {
   display: flex;
   align-items: center;
@@ -591,37 +647,6 @@ button.pill:disabled {
   text-underline-offset: 5px;
 }
 
-/* Preview */
-.preview {
-  max-width: 480px;
-  width: 100%;
-  justify-self: end;
-}
-
-.preview__note {
-  margin: 0 0 10px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--ink-muted);
-}
-
-.snip {
-  border-radius: 18px 22px 16px 20px;
-}
-
-.snip--match {
-  padding: 22px 24px;
-  background: var(--cream-card);
-  border: 1px solid var(--line);
-}
-
-.snip--event {
-  margin-left: 80px;
-  padding: 18px 22px;
-  background: var(--olive);
-  color: var(--white);
-}
-
 .snip__head {
   display: flex;
   align-items: center;
@@ -639,10 +664,6 @@ button.pill:disabled {
   color: var(--forest);
 }
 
-.snip--event .snip__kind {
-  color: var(--white);
-}
-
 .snip__demo {
   flex: 0 0 auto;
   padding: 2px 9px;
@@ -655,90 +676,564 @@ button.pill:disabled {
   color: var(--ink-muted);
 }
 
-.snip--event .snip__demo {
-  color: var(--white);
+/* ---------- How it works: feature carousel ---------- */
+
+/* The heading sits in the page column. The track starts at the same left edge, which
+   clips slides already passed, and runs to the right edge of the window so the next
+   slide peeks in. */
+.journey {
+  --edge: max(var(--gutter), calc((100vw - 1180px) / 2));
+  --slide-w: min(960px, 78vw);
+  padding-left: 0;
+  padding-right: 0;
 }
 
-.snip__title-row {
+.journey__head {
   display: flex;
-  align-items: baseline;
+  flex-wrap: wrap;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 24px 48px;
+  margin-bottom: clamp(28px, 4vw, 44px);
+  padding: 0 var(--edge);
 }
 
-.snip__title {
-  margin: 0;
-  font-size: 1.6rem;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+.journey__head > div:first-child {
+  max-width: 42em;
 }
 
-.snip--event .snip__title {
-  font-size: 1.2rem;
+.journey__head .intro__lead {
+  margin-bottom: 0;
 }
 
-.snip__score {
-  margin: 0;
-  flex: 0 0 auto;
-  font-size: 0.9rem;
+.journey__controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.journey__count {
+  margin: 0 12px 0 0;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
   color: var(--ink-muted);
 }
 
-.snip__score strong {
-  font-size: 1.5rem;
+.journey__count strong {
   color: var(--forest);
 }
 
-.snip__meta {
-  margin: 4px 0 0;
-  font-size: 0.95rem;
+.journey__btn {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 1.5px solid var(--forest);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--forest);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.journey__btn path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.journey__btn:hover:not(:disabled) {
+  background: var(--forest);
   color: var(--white);
 }
 
-.facts {
+.journey__btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Positioned so slide offsetLeft is measured from the track */
+.journey__track {
+  position: relative;
+  display: flex;
+  gap: clamp(14px, 2vw, 24px);
+  margin-left: var(--edge);
+  /* End padding lets the last slide snap to the left edge like the others */
+  padding: 4px max(var(--edge), calc(100vw - var(--edge) - var(--slide-w))) 12px 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.journey__track::-webkit-scrollbar {
+  display: none;
+}
+
+.journey__track:focus-visible {
+  outline-offset: -3px;
+}
+
+/* ---------- Slides: shared frame, each with its own composition ---------- */
+
+.slide {
+  display: grid;
+  flex: 0 0 var(--slide-w);
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  min-height: clamp(420px, 36vw, 500px);
+  border-radius: 20px;
+  overflow: hidden;
+  scroll-snap-align: start;
+}
+
+.slide__copy {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(28px, 4vw, 52px);
+}
+
+.slide__kicker {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.slide__title {
+  margin: auto 0 12px;
+  padding-top: 32px;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+.slide__text {
+  max-width: 26em;
+  margin: 0 0 28px;
+  font-size: 1.05rem;
+}
+
+.slide__link {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 10px 22px;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.slide__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.slide__visual {
+  position: relative;
+  min-width: 0;
+}
+
+.slide-tag {
+  display: inline-block;
+  padding: 1px 9px;
+  border: 1px solid var(--olive);
+  border-radius: 999px;
+  background: #eef3e3;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--forest);
+}
+
+.slide-tag--dark,
+.slide-tag--light {
+  border-color: currentColor;
+  background: transparent;
+  color: inherit;
+}
+
+/* 01 Find: olive like slide 03, copy on the left, the map bleeding off the right edge */
+.slide--find {
+  background: var(--olive);
+  color: var(--white);
+}
+
+.slide--find .slide__kicker {
+  color: #eef3e3;
+}
+
+.slide--find .slide__link {
+  border-color: var(--cream);
+  background: var(--cream);
+  color: var(--forest);
+}
+
+.slide-map {
+  position: relative;
+  height: 100%;
+  min-height: 300px;
+}
+
+.slide-map__art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.slide-map__land { fill: #f3e9d6; }
+.slide-map__park { fill: #dfe8cd; }
+.slide-map__water { fill: #d3e0d8; }
+
+.slide-map__road {
+  fill: none;
+  stroke: var(--white);
+  stroke-width: 6;
+}
+
+.slide-map__road--major {
+  stroke-width: 12;
+}
+
+.slide-map__radius {
+  fill: rgb(101 127 49 / 0.1);
+  stroke: var(--olive);
+  stroke-width: 2;
+  stroke-dasharray: 4 6;
+}
+
+.slide-map__dot {
+  stroke: var(--forest);
+  stroke-width: 3;
+}
+
+.slide-map__dot--near { fill: var(--olive); }
+.slide-map__dot--far { fill: var(--tan); }
+
+/* Same white panel the map page floats over the map */
+.slide-map__panel {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  width: min(236px, calc(100% - 48px));
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.2);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #222;
+}
+
+.slide-map__panel p {
   margin: 0;
 }
 
-.facts div {
-  display: grid;
-  grid-template-columns: 6.5em 1fr;
-  gap: 12px;
-  padding: 9px 0;
-  border-top: 1px solid var(--line);
+.slide-map__toggles {
+  display: flex;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.slide-map__toggles span {
+  padding: 3px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #f9fafb;
+  font-weight: 600;
+}
+
+.slide-map__toggles .is-on {
+  border-color: var(--forest);
+  background: var(--forest);
+  color: var(--white);
+}
+
+.slide-map__label {
+  font-weight: 600;
+}
+
+.slide-map__panel .slide-map__field {
+  margin: 6px 0 10px;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+.slide-map__panel .slide-map__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin-top: 6px;
+  color: #555;
+}
+
+.slide-map__swatch {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 5px;
+  border: 1.5px solid var(--forest);
+  border-radius: 50%;
+}
+
+.slide-map__swatch--near { background: var(--olive); }
+.slide-map__swatch--far { background: var(--tan); }
+
+/* 02 Plan: dark green, the number set large like a headline, a ruled breakdown */
+.slide--plan {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  background: var(--forest);
+  color: var(--cream);
+}
+
+.slide--plan .slide__kicker {
+  color: #c6d6b8;
+}
+
+/* Copy sits at the top here instead of the bottom */
+.slide--plan .slide__title {
+  margin-top: 0;
+}
+
+.slide--plan .slide__text {
+  color: rgb(246 239 226 / 0.85);
+}
+
+.slide--plan .slide__link {
+  margin-top: auto;
+  border-color: var(--cream);
+  background: var(--cream);
+  color: var(--forest);
+}
+
+.slide-budget {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  padding: clamp(28px, 4vw, 52px);
+  border-left: 1px solid rgb(246 239 226 / 0.18);
+}
+
+.slide-budget p {
+  margin: 0;
+}
+
+.slide-budget__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: #c6d6b8;
+}
+
+.slide-budget .slide-budget__figure {
+  margin: 8px 0 18px;
+  font-size: clamp(2.8rem, 5.5vw, 4.4rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.slide-budget__figure span {
+  font-size: 0.35em;
+  font-weight: 500;
+  letter-spacing: 0;
+  opacity: 0.75;
+}
+
+.slide-budget__track {
+  position: relative;
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(to right, #b9cd8c var(--fill), rgb(246 239 226 / 0.2) var(--fill));
+}
+
+.slide-budget__track::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: var(--fill);
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--forest);
+  border-radius: 50%;
+  background: var(--cream);
+  transform: translate(-50%, -50%);
+}
+
+.slide-budget__ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: rgb(246 239 226 / 0.65);
+}
+
+.slide-budget__rows {
+  margin: 18px 0 12px;
+}
+
+.slide-budget__rows div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+  border-top: 1px solid rgb(246 239 226 / 0.15);
   font-size: 0.95rem;
 }
 
-.facts dt {
+.slide-budget__rows dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.slide-budget__total dt {
   font-weight: 700;
 }
 
-.facts dd {
-  margin: 0;
-  color: var(--ink-muted);
+.slide-budget__total dd {
+  font-size: 1.2rem;
+  color: #c9dc9b;
 }
 
-/* Route motif: lands on the event card 36px in from its left edge */
-.route {
-  display: block;
-  width: 96px;
-  height: 56px;
-  margin: 0 0 -6px 28px;
-  overflow: visible;
+.slide-budget__upfront {
+  font-size: 0.85rem;
+  color: rgb(246 239 226 / 0.8);
 }
 
-.route__line {
-  fill: none;
-  stroke: var(--forest);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-dasharray: 0.5 8;
+.slide-budget__upfront strong {
+  color: var(--cream);
 }
 
-.route__pin {
-  fill: var(--olive);
-  stroke: var(--forest);
-  stroke-width: 2.5;
+/* 03 Settle in: olive, mirrored — posts on the left, copy on the right */
+.slide--settle {
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  background: var(--olive);
+  color: var(--white);
+}
+
+.slide--settle .slide__visual {
+  order: -1;
+}
+
+.slide--settle .slide__kicker {
+  color: #eef3e3;
+}
+
+.slide--settle .slide__link {
+  border-color: var(--cream);
+  background: var(--cream);
+  color: var(--forest);
+}
+
+.slide-feed {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  height: 100%;
+  padding: clamp(24px, 3.5vw, 44px);
+}
+
+.slide-feed .slide-tag {
+  align-self: flex-start;
+}
+
+/* Two real feed cards, loosely stacked like posts on a board */
+.slide-feed__stack .feed-card {
+  width: 82%;
+  color: var(--ink);
+  box-shadow: 0 14px 30px -12px rgb(20 40 10 / 0.5);
+}
+
+.slide-feed__stack .feed-card:first-child {
+  transform: rotate(-2.5deg);
+}
+
+.slide-feed__stack .feed-card + .feed-card {
+  position: relative;
+  margin: -22px 0 0 auto;
+  transform: rotate(1.5deg);
+}
+
+/* ---------- Phones and small tablets: slides stack their copy over the visual ---------- */
+@media (max-width: 760px) {
+  .journey {
+    --slide-w: 80vw;
+  }
+
+  .journey__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .slide,
+  .slide--plan,
+  .slide--settle {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    min-height: 0;
+  }
+
+  .slide--settle .slide__visual {
+    order: 0;
+  }
+
+  .slide__title {
+    margin-top: 0;
+    padding-top: 20px;
+  }
+
+  .slide__text {
+    margin-bottom: 20px;
+  }
+
+  .slide-map {
+    min-height: 280px;
+  }
+
+  .slide-map__panel {
+    top: 16px;
+    left: 16px;
+  }
+
+  .slide-budget {
+    border-top: 1px solid rgb(246 239 226 / 0.18);
+    border-left: 0;
+  }
+
+  .slide-feed__stack .feed-card {
+    width: 94%;
+  }
+}
+
+/* ---------- Quiz page decoration (App.jsx) ---------- */
+
+/* ASCII house pinned to the lower-left of the window, 76% transparent, behind the quiz */
+.quiz-deco {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  width: min(640px, 70vw);
+  height: auto;
+  opacity: 0.24;
+  pointer-events: none;
 }
 
 /* ---------- Map view back link (App.jsx) ---------- */
@@ -753,10 +1248,19 @@ button.pill:disabled {
   padding: 8px 16px;
   border: 1.5px solid var(--forest);
   border-radius: 999px;
-  background: var(--tan);
+  /* Tan at 20% (80% see-through); the blur keeps the text readable over the map */
+  background: rgb(220 196 166 / 0.2);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   color: var(--forest);
   font-weight: 600;
   text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.map-back:hover,
+.map-back:focus-visible {
+  background: var(--tan);
 }
 
 /* ---------- Footer ---------- */
@@ -787,8 +1291,32 @@ button.pill:disabled {
 
 /* ---------- Responsive ---------- */
 
+/* Narrow desktops: tighter spacing so the brand text, links and account buttons share one row */
+@media (min-width: 1201px) and (max-width: 1400px) {
+  .nav {
+    gap: 16px;
+  }
+
+  .nav__links {
+    gap: 10px;
+  }
+
+  .nav__links a {
+    padding: 6px 13px;
+  }
+
+  .nav__account {
+    padding-left: 16px;
+  }
+
+  .pill {
+    min-width: 0;
+    padding: 4px 16px;
+  }
+}
+
 /* Tablet and below: nav collapses behind the menu button */
-@media (max-width: 960px) {
+@media (max-width: 1200px) {
   .nav__toggle {
     display: inline-flex;
   }
@@ -817,9 +1345,15 @@ button.pill:disabled {
     margin: 0;
   }
 
+  /* Full-width rows in the menu: rounded, not pill-shaped */
   .nav__links a {
     display: block;
-    padding: 12px 14px;
+    padding: 12px 16px;
+    border-radius: 8px;
+  }
+
+  .nav__links a.nav__home {
+    display: flex;
   }
 
   .nav__account {
@@ -839,9 +1373,14 @@ button.pill:disabled {
     flex-wrap: wrap;
   }
 
-  .nav__user {
-    flex-basis: 100%;
-    max-width: none;
+  .nav__user-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .nav__user-panel {
+    right: auto;
+    left: 0;
   }
 
   .nav__error {
@@ -880,34 +1419,38 @@ button.pill:disabled {
     flex-direction: column;
     align-items: stretch;
   }
+}
 
-  .snip--match {
-    padding: 18px;
+/* Small phones: smaller brand text, and the menu button shows only its icon
+   ("Menu" stays for screen readers) so both fit on one row */
+@media (max-width: 420px) {
+  .nav {
+    gap: 12px;
   }
 
-  .snip--event {
-    margin-left: 40px;
+  .brand {
+    gap: 8px;
   }
 
-  /* Scaled route still lands on the event card */
-  .route {
-    width: 72px;
-    height: 42px;
-    margin-left: 12px;
+  .brand__logo {
+    height: 40px;
   }
 
-  .facts div {
-    grid-template-columns: 5.5em 1fr;
+  .brand__name {
+    font-size: 1rem;
+  }
+
+  .nav__toggle {
+    padding: 8px 13px;
+  }
+
+  .nav__toggle-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 
-@media (max-width: 860px) {
-  .intro__inner {
-    grid-template-columns: 1fr;
-    gap: 36px;
-  }
-
-  .preview {
-    justify-self: start;
-  }
-}
