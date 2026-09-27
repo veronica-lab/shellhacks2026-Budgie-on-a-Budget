@@ -18,4 +18,9 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    // Node-side code (Snowflake API server and Vite config)
+    files: ['server/**/*.js', 'vite.config.js'],
+    languageOptions: { globals: globals.node },
+  },
 ])

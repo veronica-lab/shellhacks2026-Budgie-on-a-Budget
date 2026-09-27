@@ -91,6 +91,18 @@ a {
   background: var(--tan);
 }
 
+/* Slides out of view while scrolling down (toggled in SiteHeader). transform
+   doesn't affect layout, so the page underneath never jumps. */
+.site-header.is-hidden {
+  transform: translateY(-100%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .site-header {
+    transition: transform 0.25s ease;
+  }
+}
+
 .nav {
   position: relative;
   display: flex;
@@ -106,8 +118,9 @@ a {
 }
 
 .brand__logo {
-  width: 52px;
-  height: auto;
+  display: block;
+  width: auto;
+  height: 56px;
 }
 
 .nav__menu {
@@ -137,7 +150,8 @@ a {
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.nav__links a:hover {
+.nav__links a:hover,
+.nav__links a[aria-current="page"] {
   background: var(--forest);
   color: var(--white);
 }
@@ -179,6 +193,45 @@ a {
 .pill:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+button.pill {
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button.pill:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.pill[aria-current="page"] {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Signed-in email next to "Log out" */
+.nav__user {
+  max-width: 16em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--forest);
+}
+
+.nav__error {
+  position: absolute;
+  top: 100%;
+  right: var(--gutter);
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 0 0 6px 6px;
+  background: #fbeae6;
+  color: #7a1f14;
+  font-size: 0.9rem;
 }
 
 .nav__toggle {
@@ -254,14 +307,75 @@ a {
   overflow: hidden;
 }
 
-/* object-fit keeps the photo's aspect ratio; it crops the edges rather than stretching */
-.hero__media img {
+/* object-fit keeps each photo's aspect ratio; it crops the edges rather than stretching.
+   Slides are stacked in the fixed-size box, so swapping them never shifts the layout. */
+.hero__slide {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 44% 50%;
+  object-position: 50% 50%;
+  opacity: 0;
+}
+
+.hero__slide.is-active {
+  opacity: 1;
+}
+
+/* The incoming photo fades in on top; the outgoing one stays underneath until
+   that finishes, so the olive background never shows through mid-fade. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero__slide {
+    transition: opacity 0s linear 0.9s;
+  }
+
+  .hero__slide.is-active {
+    z-index: 1;
+    transition: opacity 0.9s ease-in-out;
+  }
+}
+
+.hero__dots {
+  position: absolute;
+  z-index: 2;
+  bottom: 16px;
+  left: 50%;
+  display: flex;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.35);
+  transform: translateX(-50%);
+}
+
+/* 24px hit area around a 10px dot */
+.hero__dot {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.hero__dot::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--white);
+  border-radius: 50%;
+}
+
+.hero__dot[aria-current="true"]::before {
+  background: var(--white);
+}
+
+.hero .hero__dot:focus-visible {
+  outline-offset: 0;
 }
 
 .hero__panel {
@@ -276,6 +390,29 @@ a {
 
 .hero__content {
   max-width: 640px;
+}
+
+/* First-load entrance: headline, then sentence, then buttons (~0.75s total).
+   With reduced motion the class does nothing and the text is simply there. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero__content--enter > * {
+    animation: hero-enter 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .hero__content--enter > .hero__text {
+    animation-delay: 0.12s;
+  }
+
+  .hero__content--enter > .hero__actions {
+    animation-delay: 0.24s;
+  }
+}
+
+@keyframes hero-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 }
 
 .hero__title {
@@ -420,6 +557,38 @@ a {
 .phase dd {
   margin: 2px 0 0;
   font-size: 1.05rem;
+}
+
+/* Budgie tip: a small note tucked under the phases, not a feature card */
+.tip {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 30em;
+  margin-top: 20px;
+  padding: 14px 18px 14px 14px;
+  border: 1px dashed var(--olive);
+  border-radius: 14px;
+  background: var(--cream-card);
+}
+
+.tip__mascot {
+  flex-shrink: 0;
+  width: auto;
+  height: 52px;
+}
+
+.tip__text {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.tip__label {
+  color: var(--forest);
+  text-decoration: underline wavy var(--olive) 1.5px;
+  text-underline-offset: 5px;
 }
 
 /* Preview */
@@ -574,11 +743,12 @@ a {
 
 /* ---------- Map view back link (App.jsx) ---------- */
 
+/* Bottom-left, above Google's logo: the top of the map holds the destination search
+   and the Map/Satellite control, and the zoom buttons sit bottom-right. */
 .map-back {
   position: fixed;
-  top: 12px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 36px;
+  left: 12px;
   z-index: 10;
   padding: 8px 16px;
   border: 1.5px solid var(--forest);
@@ -664,6 +834,21 @@ a {
     flex: 1;
     min-height: 44px;
   }
+
+  .nav__account {
+    flex-wrap: wrap;
+  }
+
+  .nav__user {
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .nav__error {
+    position: static;
+    flex-basis: 100%;
+    border-radius: 6px;
+  }
 }
 
 @media (max-width: 760px) {
@@ -672,7 +857,7 @@ a {
     height: auto;
   }
 
-  /* Full photo at its natural 2048×1155 ratio, no cropping */
+  /* Sized to the first photo's 2048×1155 ratio; the others crop to fit */
   .hero__media {
     aspect-ratio: 2048 / 1155;
   }
@@ -688,7 +873,7 @@ a {
 
 @media (max-width: 640px) {
   .brand__logo {
-    width: 44px;
+    height: 46px;
   }
 
   .hero__actions {

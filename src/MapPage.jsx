@@ -4,12 +4,11 @@ import DestinationSearch from './DestinationSearch';
 import ZipInfoCard from './ZipInfoCard';
 import EventCard from './EventCard';
 import { findNearbyZips } from './nearbyZips';
-import { MOCK_EVENTS } from './mockEvents';
+import { useEvents } from './eventStore';
+import { CATEGORY_ICONS } from './eventCategories';
 
 const API_KEY = import.meta.env.VITE_MAPS_BROWSER_KEY;
 const MAP_ID = import.meta.env.VITE_MAP_ID;
-
-const CATEGORY_ICONS = { cafe: '☕', fitness: '🏃', music: '🎵', market: '🛍️' };
 
 function PanToDestination({ destination }) {
   const map = useMap();
@@ -27,8 +26,9 @@ export default function MapPage() {
   const [selectedZip, setSelectedZip] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  // Swap MOCK_EVENTS for the teammate's real events later
-  const events = destination ? MOCK_EVENTS : [];
+  // Live posts published through the business page
+  const { events: allEvents } = useEvents();
+  const events = destination ? allEvents : [];
 
   useEffect(() => {
     if (!destination) return;

@@ -1,0 +1,253 @@
+/* We Movers — log in / sign up (imported by AuthPage.jsx). Uses tokens from Home.css. */
+
+.auth {
+  display: grid;
+  grid-template-columns: 45fr 55fr;
+  min-height: calc(100svh - var(--header-h, var(--nav-h)));
+}
+
+/* Olive side panel, echoing the homepage hero */
+.auth__panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px var(--gutter);
+  background: var(--olive);
+  color: var(--white);
+  text-align: center;
+}
+
+.auth__panel-content {
+  max-width: 28em;
+}
+
+.auth__eyebrow {
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.auth__title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  font-size: clamp(2.1rem, 4.2vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.auth__title::after {
+  content: "";
+  display: block;
+  width: min(160px, 45%);
+  height: 2px;
+  margin-top: 14px;
+  background: var(--white);
+}
+
+.auth__lead {
+  margin: 24px 0 0;
+  font-size: clamp(1.05rem, 1.35vw, 1.2rem);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.auth__panel :focus-visible {
+  outline-color: var(--white);
+}
+
+/* Form side */
+.auth__body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(32px, 5vw, 64px) var(--gutter);
+}
+
+.auth__card {
+  width: 100%;
+  max-width: 440px;
+  padding: clamp(22px, 3vw, 32px);
+  background: var(--cream-card);
+  border: 1px solid var(--line);
+  border-radius: 18px 22px 16px 20px;
+}
+
+.auth__card > p {
+  margin: 0 0 14px;
+}
+
+.auth__card-title {
+  margin: 0 0 14px;
+  font-size: 1.6rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.field {
+  margin-bottom: 18px;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--forest);
+}
+
+.field input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--ink);
+  font: inherit;
+}
+
+.field input:hover {
+  border-color: var(--olive);
+}
+
+.field input:focus-visible {
+  outline: 3px solid var(--forest);
+  outline-offset: 1px;
+  border-color: var(--forest);
+}
+
+.field input:disabled {
+  opacity: 0.65;
+}
+
+.field__hint {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+
+.auth__submit {
+  width: 100%;
+  gap: 10px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.auth__submit:disabled {
+  cursor: progress;
+  opacity: 0.8;
+  text-decoration: none;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgb(255 255 255 / 0.35);
+  border-top-color: var(--white);
+  border-radius: 50%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .spinner {
+    animation: auth-spin 0.8s linear infinite;
+  }
+}
+
+@keyframes auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.auth__error,
+.auth__notice {
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.auth__error {
+  border: 1.5px solid #9b2c1f;
+  background: #fbeae6;
+  color: #7a1f14;
+}
+
+.auth__notice {
+  border: 1.5px solid var(--olive);
+  background: #eef3e3;
+  color: var(--forest);
+}
+
+.auth__error p {
+  margin: 0;
+}
+
+.auth__error .auth__resend {
+  margin-top: 8px;
+}
+
+.auth__resend .auth__error,
+.auth__resend .auth__notice {
+  margin: 10px 0 0;
+}
+
+.auth__hint {
+  font-size: 0.95rem;
+  color: var(--ink-muted);
+}
+
+.auth__switch {
+  margin: 18px 0 0;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--ink-muted);
+}
+
+.auth__switch a,
+.auth__link-btn {
+  color: var(--forest);
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.auth__link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.auth__link-btn:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+@media (max-width: 760px) {
+  .auth {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .auth__panel {
+    padding: 32px var(--gutter);
+  }
+
+  .auth__lead {
+    margin-top: 16px;
+  }
+
+  .auth__body {
+    align-items: flex-start;
+  }
+}

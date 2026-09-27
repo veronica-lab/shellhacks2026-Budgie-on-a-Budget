@@ -19,6 +19,9 @@ export default function ZipInfoCard({ zip }) {
           <span style={{ fontWeight: 600 }}>{value}</span>
         </div>
       ))}
+      <a href={`#/community?zip=${zip.zip}`} style={{ display: 'inline-block', marginTop: 8, fontSize: 14 }}>
+        See community events in {zip.zip} →
+      </a>
     </div>
   );
 }

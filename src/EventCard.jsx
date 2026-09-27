@@ -9,6 +9,7 @@ export default function EventCard({ event }) {
       <div style={{ fontSize: 16, fontWeight: 700 }}>{event.title}</div>
       <div style={{ fontSize: 14, color: '#555', margin: '2px 0 6px' }}>
         {event.business_name} · {event.date_time}
+        {event.address && <div>📍 {event.address}</div>}
       </div>
       {event.new_mover_perk && (
         <div style={{

@@ -1,16 +1,46 @@
-# React + Vite
+# Budgie
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Neighborhood discovery for people who just moved. React + Vite, Supabase auth, Google Maps.
 
-Currently, two official plugins are available:
+```sh
+npm install
+npm run dev
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Browser config lives in `.env.local` (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_MAPS_BROWSER_KEY`, `VITE_MAP_ID`).
 
-## React Compiler
+## Business posts (Snowflake)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The business page (`#/business`) uses Snowflake for both parts:
 
-## Expanding the ESLint configuration
+- **Help me write it**: Snowflake Cortex (`/api/v2/cortex/v1/chat/completions`) drafts a title, description,
+  category and perk from the business's notes. It only fills the form; nothing is published until the
+  business reviews it and clicks **Publish post**.
+- **Publish post**: the post is saved to `BUDGIE_DB.APP.EVENTS` through the Snowflake SQL API, and the
+  community feed and map read it from there.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The browser never talks to Snowflake. It calls `/api/*` on the Vite dev/preview server (`server/api.js`),
+and that server holds the Snowflake token.
+
+### Setup
+
+1. In a Snowflake worksheet, as an admin, run `snowflake/setup.sql` (creates the table and grants
+   `BUDGIE_AI_ROLE` what it needs).
+2. Copy `server/.env.example` to `server/.env` and paste your token after `SNOWFLAKE_PAT=`.
+   `server/.env` is gitignored and only read by the server. Never give it a `VITE_` prefix.
+3. `npm run dev` (restart it after changing `server/.env`), then open http://localhost:5173/#/business.
+
+| Variable | Default |
+| --- | --- |
+| `SNOWFLAKE_PAT` | (required) |
+| `SNOWFLAKE_ACCOUNT_URL` | `https://FCFYASQ-ZH36049.snowflakecomputing.com` |
+| `SNOWFLAKE_MODEL` | `llama3.3-70b` |
+| `SNOWFLAKE_WAREHOUSE` | `COMPUTE_WH` |
+| `SNOWFLAKE_DATABASE` / `SNOWFLAKE_SCHEMA` | `BUDGIE_DB` / `APP` |
+
+If Snowflake refuses a request, the page shows Snowflake's message and the exact grant or setting to fix.
+A PAT for a person user also needs a network policy (or an authentication policy with
+`NETWORK_POLICY_EVALUATION = ENFORCED_NOT_REQUIRED`).
+
+The `/api` routes run inside Vite (`npm run dev` and `npm run preview`). A static host serving only `dist/`
+won't have them.
