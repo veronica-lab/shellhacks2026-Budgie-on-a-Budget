@@ -26,6 +26,7 @@ dist-ssr
 scripts/schools.txt
 scripts/county-health.csv
 scripts/zcta_county.txt
+scripts/housingData.json
 
 
 

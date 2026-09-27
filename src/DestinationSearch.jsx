@@ -12,6 +12,7 @@ export default function DestinationSearch({ onSelect }) {
     const autocomplete = new places.PlaceAutocompleteElement({
       includedRegionCodes: ['us'],
     });
+    autocomplete.style.colorScheme = 'light';
     containerRef.current.appendChild(autocomplete);
 
     autocomplete.addEventListener('gmp-select', async ({ placePrediction }) => {
