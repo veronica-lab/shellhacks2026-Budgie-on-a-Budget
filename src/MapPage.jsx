@@ -8,10 +8,14 @@ import { findNearbyZips } from './nearbyZips';
 import { fetchTicketmasterEvents } from './ticketmaster';
 import { fetchCommuteTimes } from './commute';
 import { fetchListings, formatPrice, median } from './listings';
+import CompareModal from './CompareModal';
+import { compareHomes } from './compareHomes';
 import { MOCK_EVENTS } from './mockEvents';
 
 const API_KEY = import.meta.env.VITE_MAPS_BROWSER_KEY;
 const MAP_ID = import.meta.env.VITE_MAP_ID;
+// Comparing just two homes keeps each comparison light on API calls
+const MAX_SAVED = 2;
 
 const CATEGORY_ICONS = {
   cafe: '☕', fitness: '🏃', music: '🎵', market: '🛍️',
@@ -64,6 +68,11 @@ export default function MapPage({ initialZip = null }) {
   // Homes view: { zip, type: 'rent' | 'sale', listings, loading, error } or null
   const [homes, setHomes] = useState(null);
   const [selectedHome, setSelectedHome] = useState(null);
+
+  // Up to MAX_SAVED homes for comparison
+  const [savedHomes, setSavedHomes] = useState([]);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [compareState, setCompareState] = useState({ loading: false, error: null, result: null });
 
   // Coming from the quiz: center the search on that ZIP
   const { zip: startZip, lat: startLat, lng: startLng } = initialZip ?? {};
@@ -147,6 +156,32 @@ export default function MapPage({ initialZip = null }) {
         h && h.zip.zip === zip.zip && h.type === type ? { ...h, listings, loading: false } : h))
       .catch(err => setHomes(h =>
         h && h.zip.zip === zip.zip && h.type === type ? { ...h, loading: false, error: err.message } : h));
+  }
+
+  function toggleSaveHome(home) {
+    setSavedHomes(prev => {
+      const exists = prev.some(h => h.id === home.id);
+      if (exists) return prev.filter(h => h.id !== home.id);
+      if (prev.length >= MAX_SAVED || !homes) return prev;
+      return [...prev, {
+        id: home.id, address: home.address, price: home.price,
+        lat: home.lat, lng: home.lng, listingType: homes.type,
+        zip: homes.zip.zip, homeValue: homes.zip.home_value,
+        beds: home.beds, baths: home.baths, sqft: home.sqft, daysOnMarket: home.days_on_market,
+      }];
+    });
+  }
+
+  async function runCompare() {
+    setCompareOpen(true);
+    setCompareState({ loading: true, error: null, result: null });
+    try {
+      const result = await compareHomes(savedHomes);
+      setCompareState({ loading: false, error: null, result });
+    } catch (err) {
+      console.error('Compare error:', err);
+      setCompareState({ loading: false, error: err.message, result: null });
+    }
   }
 
   function exitHomes() {
@@ -292,6 +327,33 @@ export default function MapPage({ initialZip = null }) {
           )}
         </div>
 
+        {/* Saved homes / compare */}
+        {savedHomes.length > 0 && !compareOpen && (
+          <button
+            onClick={runCompare}
+            disabled={savedHomes.length < 2}
+            style={{
+              position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)',
+              zIndex: 1, background: '#19350C', color: 'white', border: 'none',
+              borderRadius: 24, padding: '10px 20px', fontSize: 14, fontWeight: 700,
+              cursor: savedHomes.length < 2 ? 'not-allowed' : 'pointer',
+              opacity: savedHomes.length < 2 ? 0.6 : 1,
+              boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+            }}
+          >
+            ♥ {savedHomes.length}/{MAX_SAVED} saved — {savedHomes.length < MAX_SAVED ? 'save 1 more to compare' : 'Compare'}
+          </button>
+        )}
+
+        {compareOpen && (
+          <CompareModal
+            state={compareState}
+            count={savedHomes.length}
+            onClose={() => setCompareOpen(false)}
+            onRetry={runCompare}
+          />
+        )}
+
         <Map
           mapId={MAP_ID}
           defaultCenter={{ lat: 39.8283, lng: -98.5795 }}
@@ -390,6 +452,9 @@ export default function MapPage({ initialZip = null }) {
                 type={homes.type}
                 medianPrice={medianPrice}
                 zipHomeValue={homes.zip.home_value}
+                isSaved={savedHomes.some(h => h.id === selectedHome.id)}
+                canSave={savedHomes.length < MAX_SAVED || savedHomes.some(h => h.id === selectedHome.id)}
+                onToggleSave={() => toggleSaveHome(selectedHome)}
               />
             </InfoWindow>
           )}
