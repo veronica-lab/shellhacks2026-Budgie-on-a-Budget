@@ -400,25 +400,30 @@ export default function MapPage({ initialZip = null }) {
             </AdvancedMarker>
           ))}
 
-          {/* House price-tag pins */}
-          {inHomesView && homes.listings.map(home => (
-            <AdvancedMarker
-              key={home.id}
-              position={{ lat: home.lat, lng: home.lng }}
-              title={home.address}
-              zIndex={selectedHome?.id === home.id ? 30 : 20}
-              onClick={() => setSelectedHome(home)}
-            >
-              <div style={{
-                background: selectedHome?.id === home.id ? '#111' : (homes.type === 'rent' ? '#0d9488' : '#2563eb'),
-                color: 'white', fontSize: 12, fontWeight: 700, padding: '3px 7px',
-                borderRadius: 12, border: '2px solid white', whiteSpace: 'nowrap',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.35)', cursor: 'pointer',
-              }}>
-                {formatPrice(home.price, homes.type)}
-              </div>
-            </AdvancedMarker>
-          ))}
+          {/* House price-tag pins: purple = saved, black = open */}
+          {inHomesView && homes.listings.map(home => {
+            const isSelected = selectedHome?.id === home.id;
+            const isSaved = savedHomes.some(h => h.id === home.id);
+            return (
+              <AdvancedMarker
+                key={home.id}
+                position={{ lat: home.lat, lng: home.lng }}
+                title={home.address}
+                zIndex={isSelected ? 30 : isSaved ? 25 : 20}
+                onClick={() => setSelectedHome(home)}
+              >
+                <div style={{
+                  background: isSaved ? '#9333ea' : isSelected ? '#111' : (homes.type === 'rent' ? '#0d9488' : '#2563eb'),
+                  color: 'white', fontSize: 12, fontWeight: 700, padding: '3px 7px',
+                  borderRadius: 12, border: `2px solid ${isSaved && isSelected ? '#111' : 'white'}`, whiteSpace: 'nowrap',
+                  boxShadow: isSaved ? '0 0 8px 2px rgba(147,51,234,0.55)' : '0 1px 4px rgba(0,0,0,0.35)',
+                  cursor: 'pointer',
+                }}>
+                  {isSaved && '♥ '}{formatPrice(home.price, homes.type)}
+                </div>
+              </AdvancedMarker>
+            );
+          })}
 
           {selectedZipData && (
             <InfoWindow
