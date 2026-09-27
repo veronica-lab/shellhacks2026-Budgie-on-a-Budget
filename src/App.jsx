@@ -45,6 +45,28 @@ function useRoute() {
   return [ROUTES[path] ?? 'home', goHome, new URLSearchParams(query)];
 }
 
+// The map can open on a ZIP picked in the quiz, e.g. "#/map?zip=33139&lat=..&lng=..".
+function parseZipQuery(params) {
+  const zip = params.get('zip');
+  if (!zip) return null;
+  const lat = Number(params.get('lat'));
+  const lng = Number(params.get('lng'));
+  return { zip, lat: Number.isFinite(lat) ? lat : null, lng: Number.isFinite(lng) ? lng : null };
+}
+
+function openMapAtZip(zip) {
+  if (!zip?.zip) {
+    window.location.hash = '#/map';
+    return;
+  }
+  const params = new URLSearchParams({ zip: zip.zip });
+  if (zip.lat != null && zip.lng != null) {
+    params.set('lat', zip.lat);
+    params.set('lng', zip.lng);
+  }
+  window.location.hash = `#/map?${params}`;
+}
+
 export default function App() {
   const [route, goHome, params] = useRoute();
   const { session, loading } = useAuth();
@@ -73,7 +95,7 @@ export default function App() {
     return (
       <>
         <a className="map-back" href="#top">&larr; Back to home</a>
-        <MapPage />
+        <MapPage key={params.toString()} initialZip={parseZipQuery(params)} />
       </>
     );
   }
@@ -82,7 +104,8 @@ export default function App() {
     return (
       <>
         <a className="map-back" href="#top">&larr; Back to home</a>
-        <PreferenceQuestionnaire onOpenMap={() => { window.location.hash = '#/map'; }} />
+        <PreferenceQuestionnaire onOpenMap={openMapAtZip} />
+
       </>
     );
   }
